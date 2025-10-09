@@ -1,14 +1,17 @@
+# =======================
 # Terraform
+# =======================
+.terraform/
 *.tfstate
 *.tfstate.*
 *.tfvars
-.terraform/
-terraform.tfstate*
 crash.log
 
+# =======================
 # Django / Python
+# =======================
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
 env/
@@ -16,16 +19,32 @@ venv/
 *.db
 *.sqlite3
 *.log
-.DS_Store
+.env
+.env.local
+local_settings.py
+media/
+staticfiles/
 
+# =======================
 # Docker
+# =======================
 *.env
 .env.*
 .dockerignore
 
-# IDE / system
+# =======================
+# IDE / OS
+# =======================
 .vscode/
 .idea/
 *.swp
 *.bak
 *.tmp
+.DS_Store
+
+# =======================
+# Frontend / Build
+# =======================
+node_modules/
+dist/
+build/
