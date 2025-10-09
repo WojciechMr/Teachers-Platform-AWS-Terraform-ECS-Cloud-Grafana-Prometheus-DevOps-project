@@ -1,0 +1,31 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform/
+terraform.tfstate*
+crash.log
+
+# Django / Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+*.db
+*.sqlite3
+*.log
+.DS_Store
+
+# Docker
+*.env
+.env.*
+.dockerignore
+
+# IDE / system
+.vscode/
+.idea/
+*.swp
+*.bak
+*.tmp
