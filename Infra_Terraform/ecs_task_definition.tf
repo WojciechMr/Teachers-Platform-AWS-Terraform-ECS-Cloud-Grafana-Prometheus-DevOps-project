@@ -30,13 +30,13 @@ resource "aws_ecs_task_definition" "platform_web" {
         }
       ]
       environment = [
-        { name = "DB_NAME", value = "edu_db" },
-        { name = "DB_USER", value = "edu_admin" },
-        { name = "DB_PASSWORD", value = "maniekirlandia1" },
-        { name = "DB_HOST", value = "edu-db-public.cbuk8souypno.eu-central-1.rds.amazonaws.com" },
-        { name = "DB_PORT", value = "5432" },
-        { name = "DJANGO_SECRET_KEY", value = "q6v$ysg&2sx%&gdn@qz&nlnt83r5wwyql(+wne#&b=fl2=*t3a" },
-        { name = "DJANGO_DEBUG", value = "True" }
+        { name = "DB_NAME", value = var.db_name },
+        { name = "DB_USER", value = var.db_user },
+        { name = "DB_PASSWORD", value = var.db_password },
+        { name = "DB_HOST", value = var.db_host },
+        { name = "DB_PORT", value = var.db_port },
+        { name = "DJANGO_SECRET_KEY", value = var.django_secret_key },
+        { name = "DJANGO_DEBUG", value = var.django_debug }
       ]
       logConfiguration = {
         logDriver = "awslogs"
