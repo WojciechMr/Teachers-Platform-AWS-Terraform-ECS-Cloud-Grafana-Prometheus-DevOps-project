@@ -31,9 +31,7 @@ jobs:
 
       - name: Force ECS service update
         run: |
-          CLUSTER_NAME="edu-ecs-cluster"
-          SERVICE_NAME="platform-web-service"
           aws ecs update-service \
-            --cluster $CLUSTER_NAME \
-            --service $SERVICE_NAME \
+            --cluster edu-ecs-cluster \
+            --service platform-web-service \
             --force-new-deployment
