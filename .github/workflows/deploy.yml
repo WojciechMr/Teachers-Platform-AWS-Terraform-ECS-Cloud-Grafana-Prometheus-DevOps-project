@@ -3,19 +3,16 @@ name: Deploy to ECS
 on:
   push:
     branches:
-      - main  # główna gałąź repo
+      - main
 
 jobs:
   deploy:
-    name: Deploy to Amazon ECS
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -23,19 +20,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # 3. Login to Amazon ECR
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 4. Build, tag, and push Docker image
       - name: Build and push Docker image
         run: |
           IMAGE_URI="${{ secrets.ECR_REPOSITORY }}:latest"
           docker build -t $IMAGE_URI backend_Django/
           docker push $IMAGE_URI
 
-      # 5. Deploy to ECS (force new deployment)
-      - name: Deploy to ECS
+      - name: Force ECS service update
         run: |
           CLUSTER_NAME="edu-ecs-cluster"
           SERVICE_NAME="platform-web-service"
