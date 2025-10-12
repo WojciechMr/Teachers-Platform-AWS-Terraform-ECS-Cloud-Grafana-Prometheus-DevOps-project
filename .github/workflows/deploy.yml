@@ -1,10 +1,9 @@
 name: Deploy to ECS
 
-# Workflow uruchamia się przy pushu na gałąź main
 on:
   push:
     branches:
-      - main
+      - main  # główna gałąź repo
 
 jobs:
   deploy:
@@ -12,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1. Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Configure AWS credentials
+      # 2. Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -24,44 +23,23 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # 3️⃣ Login to Amazon ECR
+      # 3. Login to Amazon ECR
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 4️⃣ Build, tag, and push Docker image
+      # 4. Build, tag, and push Docker image
       - name: Build and push Docker image
-        env:
-          IMAGE_URI: ${{ secrets.ECR_REPOSITORY }}:latest
         run: |
-          echo "Building Docker image..."
-          docker build -t $IMAGE_URI .
-          echo "Pushing Docker image..."
+          IMAGE_URI="${{ secrets.ECR_REPOSITORY }}:latest"
+          docker build -t $IMAGE_URI backend_Django/
           docker push $IMAGE_URI
 
-      # 5️⃣ Register new task definition in ECS
-      - name: Register ECS task definition
-        id: task_def
-        run: |
-          echo "Registering new task definition..."
-          TASK_DEFINITION_ARN=$(aws ecs register-task-definition \
-            --cli-input-json file://Infra_Terraform/ecs_task_definition.json \
-            --query "taskDefinition.taskDefinitionArn" \
-            --output text)
-          echo "TASK_DEFINITION_ARN=$TASK_DEFINITION_ARN" >> $GITHUB_ENV
-
-      # 6️⃣ Deploy to ECS service (force new deployment)
+      # 5. Deploy to ECS (force new deployment)
       - name: Deploy to ECS
         run: |
-          echo "Deploying to ECS service..."
+          CLUSTER_NAME="edu-ecs-cluster"
+          SERVICE_NAME="platform-web-service"
           aws ecs update-service \
-            --cluster edu-ecs-cluster \
-            --service platform-web-service \
-            --task-definition $TASK_DEFINITION_ARN \
+            --cluster $CLUSTER_NAME \
+            --service $SERVICE_NAME \
             --force-new-deployment
-
-      # 7️⃣ Optional: Check ECS service status
-      - name: ECS service status
-        run: |
-          aws ecs describe-services \
-            --cluster edu-ecs-cluster \
-            --services platform-web-service
