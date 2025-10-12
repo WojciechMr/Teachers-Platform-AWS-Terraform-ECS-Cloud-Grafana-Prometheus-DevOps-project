@@ -7,6 +7,11 @@ variable "aws_region" {
   default     = "eu-central-1"
 }
 
+variable "db_user" {
+  description = "Alias for database username used in ECS (mapped to DB_USER)"
+  type        = string
+  default     = "edu_admin"
+}
 # =======================
 # PostgreSQL / RDS
 # =======================

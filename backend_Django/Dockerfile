@@ -1,23 +1,44 @@
-# Pobieramy oficjalny obraz Pythona
+# ==============================
+# 1. Użyj lekkiego obrazu Pythona
+# ==============================
 FROM python:3.12-slim
 
-# Ustawiamy katalog roboczy w kontenerze
+# ==============================
+# 2. Ustaw zmienne środowiskowe
+# ==============================
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# ==============================
+# 3. Ustaw katalog roboczy
+# ==============================
 WORKDIR /app
 
-# Kopiujemy pliki zależności
+# ==============================
+# 4. Skopiuj pliki
+# ==============================
 COPY requirements.txt .
-
-# Instalujemy zależności
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Kopiujemy resztę aplikacji
+# Upewnij się, że python-dotenv i gunicorn są zainstalowane
+RUN pip install --no-cache-dir python-dotenv gunicorn
+
+# ==============================
+# 5. Skopiuj cały kod projektu
+# ==============================
 COPY . .
 
-# Exponujemy port Django
+# ==============================
+# 6. Zbierz statyczne pliki
+# ==============================
+RUN python manage.py collectstatic --noinput || echo "Brak statycznych plików — pomijam"
+
+# ==============================
+# 7. Otwórz port 8000
+# ==============================
 EXPOSE 8000
 
-# Komenda startowa (uruchamia dev server Django)
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-
-# Zainstaluj klienta PostgreSQL
-RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+# ==============================
+# 8. Uruchom Gunicorn
+# ==============================
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "web.wsgi:application"]

@@ -1,2 +1,4 @@
 Django>=4.2
-psycopg2-binary>=2.9  # jeżeli korzystasz z PostgreSQL / RDS
+psycopg2-binary>=2.9
+python-dotenv>=1.0
+gunicorn>=20.0
