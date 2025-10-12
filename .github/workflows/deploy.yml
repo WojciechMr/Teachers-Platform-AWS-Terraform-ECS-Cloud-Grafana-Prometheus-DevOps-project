@@ -1,0 +1,43 @@
+name: Deploy to ECS
+
+on:
+  push:
+    branches:
+      - main  # gałąź, z której deployujesz
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push Docker image
+        run: |
+          docker build -t ${{ secrets.ECR_REPOSITORY }}:latest backend_Django/
+          docker push ${{ secrets.ECR_REPOSITORY }}:latest
+
+      - name: Deploy to ECS
+        run: |
+          # Pobranie obecnej definicji taska i aktualizacja obrazu
+          TASK_DEF_JSON=$(aws ecs describe-task-definition --task-definition platform-web:latest)
+          NEW_TASK_DEF=$(echo $TASK_DEF_JSON | jq '.taskDefinition.containerDefinitions[0].image = "'${{ secrets.ECR_REPOSITORY }}:latest'" | { family: .taskDefinition.family, containerDefinitions: [.taskDefinition.containerDefinitions[0]], networkMode: .taskDefinition.networkMode, requiresCompatibilities: .taskDefinition.requiresCompatibilities, cpu: .taskDefinition.cpu, memory: .taskDefinition.memory, executionRoleArn: .taskDefinition.executionRoleArn }')
+          
+          # Rejestracja nowego taska
+          REGISTERED_TASK=$(aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEF")
+          TASK_ARN=$(echo $REGISTERED_TASK | jq -r '.taskDefinition.taskDefinitionArn')
+
+          # Aktualizacja serwisu ECS
+          aws ecs update-service --cluster edu-ecs-cluster --service platform-web-service --task-definition $TASK_ARN --force-new-deployment
