@@ -10,11 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Configure AWS
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -22,19 +20,43 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Login to ECR
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Build and push Docker image
       - name: Build and push Docker image
+        env:
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
-          IMAGE_URI="${{ secrets.ECR_REPOSITORY }}:latest"
+          IMAGE_TAG=$(date +%s)
+          IMAGE_URI="$ECR_REPOSITORY:$IMAGE_TAG"
+
+          echo "Building image: $IMAGE_URI"
           docker build -t $IMAGE_URI backend_Django/
           docker push $IMAGE_URI
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
-      # Force ECS service redeploy
-      - name: Force ECS service update
+      - name: Update ECS task definition
+        env:
+          IMAGE_URI: ${{ env.IMAGE_URI }}
+        run: |
+          FAMILY="platform-web"
+          TASK_DEF_FILE="task-def.json"
+          NEW_TASK_DEF_FILE="new-task-def.json"
+
+          # Pobierz istniejącą definicję
+          aws ecs describe-task-definition \
+            --task-definition $FAMILY \
+            --query 'taskDefinition' > $TASK_DEF_FILE
+
+          # Zaktualizuj obraz Dockera
+          cat $TASK_DEF_FILE | jq --arg IMAGE "$IMAGE_URI" \
+            '.containerDefinitions[0].image=$IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' > $NEW_TASK_DEF_FILE
+
+          # Zarejestruj nową definicję
+          aws ecs register-task-definition \
+            --cli-input-json file://$NEW_TASK_DEF_FILE
+
+      - name: Deploy new task to ECS
         run: |
           aws ecs update-service \
             --cluster edu-ecs-cluster \
