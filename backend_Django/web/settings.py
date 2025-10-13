@@ -19,8 +19,9 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 # ======================
 ALLOWED_HOSTS = os.getenv(
     'DJANGO_ALLOWED_HOSTS',
-    'localhost,edu-app-alb-507939115.eu-central-1.elb.amazonaws.com,edublinkier.com,www.edublinkier.com'
+    'localhost,edu-app-alb-507939115.eu-central-1.elb.amazonaws.com,edublinkier.com,www.edublinkier.com,10.0.10.55,10.0.11.173,10.0.11.71'
 ).split(',')
+
 
 # ======================
 # Installed apps

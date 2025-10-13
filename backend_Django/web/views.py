@@ -7,4 +7,4 @@ def home(request):
 
 @csrf_exempt
 def health(request):
-    return HttpResponse("OK", status=200)
+    return HttpResponse(status=200)
