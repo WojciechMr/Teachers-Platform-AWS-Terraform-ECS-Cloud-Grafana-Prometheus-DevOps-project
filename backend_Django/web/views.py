@@ -6,3 +6,6 @@ def home(request):
 
 def health(request):
     return JsonResponse({"status": "ok"})
+
+def health(request):
+    return HttpResponse("OK")  # <- dla ALB
