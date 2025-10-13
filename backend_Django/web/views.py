@@ -7,4 +7,7 @@ def home(request):
 
 @csrf_exempt
 def health(request):
+    """
+    Minimalny endpoint dla ALB Health Check
+    """
     return HttpResponse(status=200)
