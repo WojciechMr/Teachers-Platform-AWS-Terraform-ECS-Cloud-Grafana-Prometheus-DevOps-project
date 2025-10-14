@@ -31,13 +31,13 @@ resource "aws_lb_target_group" "platform_web_tg" {
   vpc_id      = module.networking.vpc_id
   target_type = "ip"
 
-  health_check {
-    path = "/health"
-    interval = 30
-    healthy_threshold = 2
-    timeout = 10
-    unhealthy_threshold = 2
-    matcher = "200,302"
+health_check {
+  path                = "/"
+  interval            = 30
+  healthy_threshold   = 2
+  timeout             = 10
+  unhealthy_threshold = 2
+  matcher             = "200"
 }
 
   tags = { Name = "platform-web-tg" }
