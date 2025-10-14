@@ -21,7 +21,7 @@ resource "aws_ecs_task_definition" "platform_web" {
   container_definitions = jsonencode([
     {
       name      = "english-platform"
-      image     = "998244281811.dkr.ecr.eu-central-1.amazonaws.com/english-platform:latest"
+      image     = var.image_uri
       essential = true
       portMappings = [
         {
@@ -37,7 +37,7 @@ resource "aws_ecs_task_definition" "platform_web" {
         { name = "DB_PORT", value = var.db_port },
         { name = "DJANGO_SECRET_KEY", value = var.django_secret_key },
         { name = "DJANGO_DEBUG", value = "False" },  # <- string "False"
-        { name = "DJANGO_ALLOWED_HOSTS", value = "edublinkier.com,www.edublinkier.com,edu-app-alb-507939115.eu-central-1.elb.amazonaws.com" },
+        { name = "DJANGO_ALLOWED_HOSTS", value = var.django_allowed_hosts },
         { name = "DJANGO_SETTINGS_MODULE", value = "web.settings" }
       ]
       logConfiguration = {
