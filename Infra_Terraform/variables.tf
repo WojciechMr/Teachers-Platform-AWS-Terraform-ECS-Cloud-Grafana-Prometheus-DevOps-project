@@ -58,3 +58,13 @@ variable "django_debug" {
   type        = string
   default     = "True"
 }
+
+variable "django_allowed_hosts" {
+  description = "Dozwolone hosty Django (oddzielone przecinkami)"
+  type        = string
+}
+
+variable "image_uri" {
+  description = "Adres obrazu kontenera w ECR (np. repozytorium:tag)"
+  type        = string
+}

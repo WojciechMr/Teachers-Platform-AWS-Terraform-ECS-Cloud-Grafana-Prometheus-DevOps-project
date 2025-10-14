@@ -35,11 +35,12 @@ resource "aws_security_group" "ecs_sg" {
   vpc_id      = module.networking.vpc_id
 
   ingress {
-    from_port       = 8000
-    to_port         = 8000
-    protocol        = "tcp"
-    security_groups = [aws_security_group.alb_sg.id]  # ruch tylko z ALB
-  }
+  from_port       = 8000
+  to_port         = 8000
+  protocol        = "tcp"
+  security_groups = [aws_security_group.alb_sg.id]  # <<< to jest poprawne
+  description     = "Allow ALB to connect to ECS on port 8000"
+}
 
   egress {
     from_port   = 0

@@ -32,12 +32,12 @@ resource "aws_lb_target_group" "platform_web_tg" {
   target_type = "ip"
 
   health_check {
-    path                = "/"
-    interval            = 30
-    healthy_threshold   = 2
+    path = "/health"
+    interval = 30
+    healthy_threshold = 2
     unhealthy_threshold = 2
-    matcher             = "200,302"
-  }
+    matcher = "200"
+}
 
   tags = { Name = "platform-web-tg" }
 }
