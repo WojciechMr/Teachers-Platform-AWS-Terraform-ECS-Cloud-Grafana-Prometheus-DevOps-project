@@ -35,8 +35,9 @@ resource "aws_lb_target_group" "platform_web_tg" {
     path = "/health"
     interval = 30
     healthy_threshold = 2
+    timeout = 10
     unhealthy_threshold = 2
-    matcher = "200"
+    matcher = "200,302"
 }
 
   tags = { Name = "platform-web-tg" }
