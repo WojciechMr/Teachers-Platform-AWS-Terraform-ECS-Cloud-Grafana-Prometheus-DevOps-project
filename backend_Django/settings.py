@@ -25,7 +25,16 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 # ======================
 # Allowed hosts
 # ======================
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = [
+    "localhost",
+    "edu-app-alb-507939115.eu-central-1.elb.amazonaws.com",
+    "edublinkier.com",
+    "www.edublinkier.com",
+    "10.0.10.55",
+    "10.0.11.173",
+    "10.0.11.71",
+    "10.0.10.106"  # <-- dodaj aktualny target IP
+]
 
 # ======================
 # Database configuration
