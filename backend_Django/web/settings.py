@@ -25,7 +25,8 @@ ALLOWED_HOSTS = [
     "10.0.10.55",
     "10.0.11.173",
     "10.0.11.71",
-    "10.0.10.106"  # <-- dodaj aktualny target IP
+    "10.0.10.106"
+    "10.0.11.186"  # <-- dodaj aktualny target IP
 ]
 
 
