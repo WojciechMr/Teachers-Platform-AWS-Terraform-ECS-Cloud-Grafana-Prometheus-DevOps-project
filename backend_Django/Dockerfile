@@ -41,4 +41,4 @@ EXPOSE 8000
 # ==============================
 # 8. Uruchom Gunicorn
 # ==============================
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "web.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "120", "web.wsgi:application"]

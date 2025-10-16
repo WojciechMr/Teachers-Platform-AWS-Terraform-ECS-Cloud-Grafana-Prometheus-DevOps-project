@@ -1,12 +1,10 @@
 import os
 from pathlib import Path
-#from dotenv import load_dotenv
 
 # ======================
 # Paths
 # ======================
 BASE_DIR = Path(__file__).resolve().parent.parent
-#load_dotenv(BASE_DIR / '.env')
 
 # ======================
 # Secret key & debug
@@ -17,8 +15,9 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 # ======================
 # Allowed hosts
 # ======================
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
-
+# Musi być jedną linią po przecinku w ENV
+# DJANGO_ALLOWED_HOSTS=edublinkier.com,www.edublinkier.com,edu-app-alb-507939115.eu-central-1.elb.amazonaws.com
+ALLOWED_HOSTS = [host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host]
 
 # ======================
 # Installed apps
@@ -98,6 +97,7 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 APPEND_SLASH = False
+
 # ======================
 # Static & media files
 # ======================
