@@ -8,16 +8,18 @@ data "aws_security_group" "ecs_sg" {
   }
 }
 
+# ECS Service (force new deployment)
+# ======================
 resource "aws_ecs_service" "platform_web_service" {
   name            = "platform-web-service"
-  cluster         = aws_ecs_cluster.edu_ecs_cluster.id
-  task_definition = aws_ecs_task_definition.platform_web.arn
+  cluster         = aws_ecs_cluster.edu_ecs_cluster.id   # Twój istniejący cluster
   desired_count   = 1
   launch_type     = "FARGATE"
+  task_definition = aws_ecs_task_definition.platform_web.arn
 
   network_configuration {
-    subnets          = module.networking.private_subnets
-    security_groups  = [data.aws_security_group.ecs_sg.id]  # teraz używamy data source
+    subnets         = module.networking.private_subnets
+    security_groups = [data.aws_security_group.ecs_sg.id]
     assign_public_ip = false
   }
 
@@ -27,15 +29,14 @@ resource "aws_ecs_service" "platform_web_service" {
     container_port   = 8000
   }
 
-  deployment_controller {
-    type = "ECS"
-  }
-
+  # Minimum/Maximum dla Availability Zone Rebalancing muszą być w dopuszczalnym zakresie
   deployment_minimum_healthy_percent = 50
   deployment_maximum_percent         = 200
 
-  enable_ecs_managed_tags = true
-  propagate_tags           = "SERVICE"
+  # FORCE NEW DEPLOYMENT: wymusza restart tasków z nowym Task Definition
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
 
   depends_on = [
     aws_ecs_task_definition.platform_web

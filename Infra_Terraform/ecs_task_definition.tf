@@ -31,18 +31,18 @@ resource "aws_ecs_task_definition" "platform_web" {
           
         }
       ]
-environment = [
-  { name = "DB_NAME", value = var.db_name },
-  { name = "DB_USER", value = var.db_user },
-  { name = "DB_PASSWORD", value = var.db_password },
-  { name = "DB_HOST", value = var.db_host },
-  { name = "DB_PORT", value = var.db_port },
-  { name = "DJANGO_SECRET_KEY", value = var.django_secret_key },
-  { name = "DJANGO_DEBUG", value = var.django_debug },  # string "False"
-  { name = "DJANGO_ALLOWED_HOSTS", value = var.django_allowed_hosts },  # <- tu
-  { name = "DJANGO_SETTINGS_MODULE", value = "web.settings" }
-]
-
+      environment = [
+        { name = "DB_NAME", value = var.db_name },
+        { name = "DB_USER", value = var.db_user },
+        { name = "DB_PASSWORD", value = var.db_password },
+        { name = "DB_HOST", value = var.db_host },
+        { name = "DB_PORT", value = var.db_port },
+        { name = "DJANGO_SECRET_KEY", value = var.django_secret_key },
+        { name = "DJANGO_DEBUG", value = var.django_debug },
+        # <- Tutaj wszystkie hosty w jednej linii po przecinku
+        { name = "DJANGO_ALLOWED_HOSTS", value = var.django_allowed_hosts },
+        { name = "DJANGO_SETTINGS_MODULE", value = "web.settings" }
+      ]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
