@@ -53,8 +53,6 @@ resource "aws_security_group" "ecs_sg" {
 
   lifecycle {
     ignore_changes = [
-      ingress,
-      egress,
       description
     ]
   }
@@ -93,9 +91,9 @@ resource "aws_security_group" "rds_sg" {
 
   lifecycle {
     ignore_changes = [
+      description,
       ingress,
       egress,
-      description
     ]
   }
 }

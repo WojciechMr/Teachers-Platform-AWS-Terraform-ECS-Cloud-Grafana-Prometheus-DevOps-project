@@ -68,3 +68,7 @@ variable "image_uri" {
   description = "Adres obrazu kontenera w ECR (np. repozytorium:tag)"
   type        = string
 }
+
+variable "private_subnets" {
+  type = list(string)
+}
