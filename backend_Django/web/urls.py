@@ -17,5 +17,6 @@ urlpatterns = [
 
 # Dodajemy health check
 urlpatterns += [
+    path("", health_check),  # opcjonalnie dla root
     path("healthz", health_check),
 ]
