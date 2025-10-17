@@ -1,5 +1,11 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# ======================
+# Load environment variables from .env (local development)
+# ======================
+load_dotenv()  # w ECS/Docker można to pominąć, bo zmienne środowiskowe będą ustawione
 
 # ======================
 # Paths
@@ -10,13 +16,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Secret key & debug
 # ======================
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'fallback-secret-key')
-DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() == 'true'
 
 # ======================
 # Allowed hosts
 # ======================
-# Musi być jedną linią po przecinku w ENV
-# DJANGO_ALLOWED_HOSTS=edublinkier.com,www.edublinkier.com,edu-app-alb-507939115.eu-central-1.elb.amazonaws.com
+# Przykład ENV:
+# DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost,edu-app-alb-507939115.eu-central-1.elb.amazonaws.com
 ALLOWED_HOSTS = [host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host]
 
 # ======================
@@ -111,3 +117,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key
 # ======================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ======================
+# Health check endpoint for ALB
+# ======================
+# W urls.py dodaj:
+# from django.http import HttpResponse
+# def health_check(request):
+#     return HttpResponse("ok", status=200)
+# path('healthz', health_check)

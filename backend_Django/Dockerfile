@@ -1,44 +1,40 @@
-# ==============================
-# 1. Użyj lekkiego obrazu Pythona
-# ==============================
-FROM python:3.12-slim
+# Base image
+FROM python:3.11-slim
 
-# ==============================
-# 2. Ustaw zmienne środowiskowe
-# ==============================
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# ==============================
-# 3. Ustaw katalog roboczy
-# ==============================
+# Set workdir
 WORKDIR /app
 
-# ==============================
-# 4. Skopiuj pliki
-# ==============================
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Upewnij się, że python-dotenv i gunicorn są zainstalowane
-RUN pip install --no-cache-dir python-dotenv gunicorn
-
-# ==============================
-# 5. Skopiuj cały kod projektu
-# ==============================
+# Copy project files
 COPY . .
 
-# ==============================
-# 6. Zbierz statyczne pliki
-# ==============================
-RUN python manage.py collectstatic --noinput || echo "Brak statycznych plików — pomijam"
+# Ensure static files directory exists
+RUN mkdir -p /app/staticfiles
 
-# ==============================
-# 7. Otwórz port 8000
-# ==============================
+# Expose port 8000
 EXPOSE 8000
 
-# ==============================
-# 8. Uruchom Gunicorn
-# ==============================
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "120", "web.wsgi:application"]
+# Set environment variables (optional defaults; w ECS Task Definition możesz nadpisać)
+ENV DJANGO_DEBUG=False
+ENV DJANGO_ALLOWED_HOSTS=edu-app-alb-507939115.eu-central-1.elb.amazonaws.com
+ENV DJANGO_SECRET_KEY=q6v$ysg&2sx%&gdn@qz&nlnt83r5wwyql(+wne#&b=fl2=*t3a
+ENV DB_NAME=edu_db
+ENV DB_USER=edu_admin
+ENV DB_PASSWORD=xxxxxx
+ENV DB_HOST=edu-db-public.cbuk8souypno.eu-central-1.rds.amazonaws.com
+ENV DB_PORT=5432
+
+# Collect static files (opcja, jeśli używasz STATIC_ROOT)
+RUN python manage.py collectstatic --noinput
+
+# Start Gunicorn
+CMD ["gunicorn", "web.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
