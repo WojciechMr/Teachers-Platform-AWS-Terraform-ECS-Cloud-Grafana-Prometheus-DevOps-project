@@ -1,6 +1,6 @@
-# -----------------------------
-# Pobranie istniejącego SG dla ECS
-# -----------------------------
+# ==========================================
+# Pobranie istniejącej SG dla ECS
+# ==========================================
 data "aws_security_group" "ecs_sg" {
   filter {
     name   = "group-name"
@@ -8,17 +8,18 @@ data "aws_security_group" "ecs_sg" {
   }
 }
 
-# ECS Service (force new deployment)
-# ======================
+# ==========================================
+# ECS Service
+# ==========================================
 resource "aws_ecs_service" "platform_web_service" {
   name            = "platform-web-service"
-  cluster         = aws_ecs_cluster.edu_ecs_cluster.id   # Twój istniejący cluster
+  cluster         = aws_ecs_cluster.edu_ecs_cluster.id
   desired_count   = 1
   launch_type     = "FARGATE"
   task_definition = aws_ecs_task_definition.platform_web.arn
 
   network_configuration {
-    subnets         = module.networking.private_subnets
+    subnets         = var.private_subnets
     security_groups = [data.aws_security_group.ecs_sg.id]
     assign_public_ip = false
   }
@@ -29,11 +30,12 @@ resource "aws_ecs_service" "platform_web_service" {
     container_port   = 8000
   }
 
-  # Minimum/Maximum dla Availability Zone Rebalancing muszą być w dopuszczalnym zakresie
   deployment_minimum_healthy_percent = 50
   deployment_maximum_percent         = 200
+  health_check_grace_period_seconds  = 120
 
-  # FORCE NEW DEPLOYMENT: wymusza restart tasków z nowym Task Definition
+  force_new_deployment = true   # <- wymusza pobranie nowego obrazu latest
+
   lifecycle {
     ignore_changes = [task_definition]
   }

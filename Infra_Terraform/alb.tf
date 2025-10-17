@@ -32,7 +32,7 @@ resource "aws_lb_target_group" "platform_web_tg" {
   target_type = "ip"
 
 health_check {
-  path                = "/"
+  path                = "/healthz"
   interval            = 30
   healthy_threshold   = 2
   timeout             = 10

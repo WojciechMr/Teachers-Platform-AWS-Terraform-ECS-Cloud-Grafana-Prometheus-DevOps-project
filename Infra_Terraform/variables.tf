@@ -72,3 +72,10 @@ variable "image_uri" {
 variable "private_subnets" {
   type = list(string)
 }
+
+
+variable "image_tag" {
+  description = "Tag obrazu dla ECS (np. latest)"
+  type        = string
+  default     = "latest"  # opcjonalnie, jeśli chcesz mieć wartość domyślną
+}
