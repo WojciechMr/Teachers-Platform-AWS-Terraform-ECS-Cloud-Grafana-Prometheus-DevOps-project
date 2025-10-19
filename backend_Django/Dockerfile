@@ -26,7 +26,7 @@ EXPOSE 8000
 # Set environment variables (optional defaults; w ECS Task Definition możesz nadpisać)
 ENV DJANGO_DEBUG=False
 ENV DJANGO_ALLOWED_HOSTS=edu-app-alb-507939115.eu-central-1.elb.amazonaws.com
-ENV DJANGO_SECRET_KEY=q6v$ysg&2sx%&gdn@qz&nlnt83r5wwyql(+wne#&b=fl2=*t3a
+ENV DJANGO_SECRET_KEY="q6v$ysg&2sx%&gdn@qz&nlnt83r5wwyql(+wne#&b=fl2=*t3a"
 ENV DB_NAME=edu_db
 ENV DB_USER=edu_admin
 ENV DB_PASSWORD=xxxxxx
