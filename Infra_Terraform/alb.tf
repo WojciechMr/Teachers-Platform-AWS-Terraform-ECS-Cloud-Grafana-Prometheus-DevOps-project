@@ -1,148 +1,62 @@
-# -----------------------------
-# Pobranie istniejącego SG dla ALB
-# -----------------------------
-data "aws_security_group" "alb_sg" {
-  filter {
-    name   = "group-name"
-    values = ["edu-alb-sg"]
-  }
-}
-
-# -----------------------------
-# Application Load Balancer
-# -----------------------------
-resource "aws_lb" "app_lb" {
-  name               = "edu-app-alb"
-  load_balancer_type = "application"
-  internal           = false
-  security_groups    = [data.aws_security_group.alb_sg.id]  # teraz używamy data source
-  subnets            = module.networking.public_subnets
-
-  tags = { Name = "edu-app-alb" }
-}
-
-# -----------------------------
-# Target Group dla ECS
-# -----------------------------
-resource "aws_lb_target_group" "platform_web_tg" {
-  name        = "platform-web-tg"
-  port        = 8000
-  protocol    = "HTTP"
-  vpc_id      = module.networking.vpc_id
-  target_type = "ip"
-
-health_check {
-  path                = "/healthz"
-  interval            = 30
-  healthy_threshold   = 2
-  timeout             = 10
-  unhealthy_threshold = 2
-  matcher             = "200"
-}
-
-  tags = { Name = "platform-web-tg" }
-}
-
-# -----------------------------
-# Listener HTTP 80
-# -----------------------------
-# resource "aws_lb_listener" "http" {
-#  load_balancer_arn = aws_lb.app_lb.arn
-#  port              = 80
-#  protocol          = "HTTP"
-#
-#  default_action {
-#    type             = "forward"
-#    target_group_arn = aws_lb_target_group.platform_web_tg.arn
-#  }
-#}
-
-# -----------------------------
-# Output DNS ALB
-# -----------------------------
-output "alb_dns_name" {
-  value = aws_lb.app_lb.dns_name
-}
-
-
-#############################
-# ZMIENNE
-#############################
-variable "domain_name" {
-  description = "Nazwa domeny głównej (np. edublinkier.com)"
-  type        = string
-  default     = "edublinkier.com"
-}
-
-#############################
-# ROUTE 53 — ZONE
-#############################
-data "aws_route53_zone" "main" {
-  name         = var.domain_name
-  private_zone = false
-}
-
-#############################
-# CERTYFIKAT ACM (DNS VALIDATION)
-#############################
+# =========================
+# ACM Certificate (istniejący)
+# =========================
 resource "aws_acm_certificate" "cert" {
-  domain_name               = var.domain_name
-  subject_alternative_names = ["www.${var.domain_name}"]
-  validation_method         = "DNS"
+  domain_name       = "edublinkier.com"
+  validation_method = "DNS"
+}
+
+# =========================
+# Application Load Balancer
+# =========================
+resource "aws_lb" "app_alb" {
+  name               = "app-alb-${var.environment}"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg.id]
+  subnets            = module.vpc.public_subnets
 
   tags = {
-    Name = "edublinkier-acm-cert"
+    Environment = var.environment
   }
 }
 
-# Rekordy DNS do walidacji certyfikatu
-resource "aws_route53_record" "cert_validation" {
-  for_each = {
-    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => dvo
+# =========================
+# Target Group (nowa TG na 8000)
+# =========================
+resource "aws_lb_target_group" "ecs_tg_new_8000" {
+  name        = "ecs-tg-${var.environment}-8000"
+  port        = 8000
+  protocol    = "HTTP"
+  vpc_id      = module.vpc.vpc_id
+  target_type = "ip"
+
+  health_check {
+    path                = "/health/"
+    protocol            = "HTTP"
+    matcher             = "200"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
   }
 
-  zone_id = data.aws_route53_zone.main.zone_id
-  name    = each.value.resource_record_name
-  type    = each.value.resource_record_type
-  ttl     = 60
-  records = [each.value.resource_record_value]
-}
-
-# Walidacja certyfikatu ACM
-resource "aws_acm_certificate_validation" "cert_validation_complete" {
-  certificate_arn         = aws_acm_certificate.cert.arn
-  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
-}
-
-#############################
-# LISTENER HTTPS (443)
-#############################
-resource "aws_lb_listener" "https" {
-  load_balancer_arn = aws_lb.app_lb.arn
-  port              = 443
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = aws_acm_certificate.cert.arn
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.platform_web_tg.arn
+  tags = {
+    Environment = var.environment
+    Project     = "django-app"
   }
-
-  depends_on = [aws_acm_certificate_validation.cert_validation_complete]
 }
 
-#############################
-# REDIRECT z HTTP -> HTTPS
-#############################
-resource "aws_lb_listener" "http_redirect" {
-  load_balancer_arn = aws_lb.app_lb.arn
+# =========================
+# HTTP Listener → redirect do HTTPS
+# =========================
+resource "aws_lb_listener" "http_listener" {
+  load_balancer_arn = aws_lb.app_alb.arn
   port              = 80
   protocol          = "HTTP"
 
   default_action {
     type = "redirect"
-
     redirect {
       port        = "443"
       protocol    = "HTTPS"
@@ -151,49 +65,19 @@ resource "aws_lb_listener" "http_redirect" {
   }
 }
 
-#############################
-# ROUTE 53 — ALIAS RECORDS
-#############################
+# =========================
+# HTTPS Listener → forward do TG na 8000
+# =========================
+resource "aws_lb_listener" "https_listener" {
+  load_balancer_arn = aws_lb.app_alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  
+  certificate_arn = "arn:aws:acm:eu-central-1:998244281811:certificate/22cc65cb-7485-41fb-97d5-b339ceb3d78e"
 
-# Główna domena (edublinkier.com)
-resource "aws_route53_record" "alb_alias_root" {
-  zone_id = data.aws_route53_zone.main.zone_id
-  name    = var.domain_name
-  type    = "A"
-
-  alias {
-    name                   = aws_lb.app_lb.dns_name
-    zone_id                = aws_lb.app_lb.zone_id
-    evaluate_target_health = true
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ecs_tg_new_8000.arn
   }
-
-  depends_on = [aws_acm_certificate_validation.cert_validation_complete]
-}
-
-# Subdomena www (www.edublinkier.com)
-resource "aws_route53_record" "alb_alias_www" {
-  zone_id = data.aws_route53_zone.main.zone_id
-  name    = "www.${var.domain_name}"
-  type    = "A"
-
-  alias {
-    name                   = aws_lb.app_lb.dns_name
-    zone_id                = aws_lb.app_lb.zone_id
-    evaluate_target_health = true
-  }
-
-  depends_on = [aws_acm_certificate_validation.cert_validation_complete]
-}
-
-#############################
-# OUTPUTS
-#############################
-output "https_domain_url" {
-  description = "Publiczny adres HTTPS aplikacji"
-  value       = "https://${var.domain_name}"
-}
-
-output "https_www_domain_url" {
-  description = "Publiczny adres HTTPS aplikacji z www"
-  value       = "https://www.${var.domain_name}"
 }
