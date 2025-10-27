@@ -6,4 +6,4 @@ def health(request):
     return HttpResponse("OK", status=200)
 
 def home(request):
-    return HttpResponse("Hello, world!")
+    return HttpResponse("the platform is currently under renovation, the official monthly Open Source is scheduled for December, Welcome!")
