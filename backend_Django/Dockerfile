@@ -1,31 +1,27 @@
-# Base image
-FROM python:3.11-slim
+# --- Bazowy obraz ---
+FROM python:3.12-slim
 
-# Set working directory
+# --- Ustaw katalog roboczy ---
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
+# --- Zmienne środowiskowe ---
+ENV PYTHONUNBUFFERED=1
+
+# --- Systemowe zależności dla PostgreSQL ---
+RUN apt-get update && apt-get install -y build-essential libpq-dev --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first (Docker cache optimization)
+# --- Skopiuj plik requirements i zainstaluj zależności ---
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
+# --- Skopiuj resztę kodu aplikacji ---
 COPY . .
 
-# Ensure static files directory exists
-RUN mkdir -p /app/staticfiles
-
-# Expose port 8000 for Gunicorn
-EXPOSE 8000
-
-# Collect static files (optional if using STATIC_ROOT)
+# --- Collect static files ---
+# Jeśli w .env masz ustawione zmienne środowiskowe, Dockerfile je użyje automatycznie
 RUN python manage.py collectstatic --noinput
 
-# Start Gunicorn
-CMD ["gunicorn", "web.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
-
+# --- Gunicorn nasłuchuje na 0.0.0.0:8000 ---
+CMD ["gunicorn", "web.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "30", "--access-logfile", "-", "--error-logfile", "-"]
