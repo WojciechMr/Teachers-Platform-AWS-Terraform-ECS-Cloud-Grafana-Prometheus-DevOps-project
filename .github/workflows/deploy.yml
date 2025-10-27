@@ -1,24 +1,16 @@
-name: Deploy Django Backend to ECS
+name: Deploy Django to ECS
 
 on:
   push:
     branches:
-      - main  # lub Twój branch produkcyjny
-
-env:
-  AWS_REGION: eu-central-1
-  ECR_REPOSITORY: 998244281811.dkr.ecr.eu-central-1.amazonaws.com/django-app
-  CLUSTER_NAME: django-cluster-prod
-  SERVICE_NAME: django-service-prod
-  TASK_FAMILY: django-task-prod  # Twój aktualny task definition
-  IMAGE_TAG: ${{ github.sha }}
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Configure AWS credentials
@@ -26,43 +18,42 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Docker image
+      - name: Build and push Docker image
+        env:
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
-          cd backend_Django
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-
-      - name: Push Docker image to ECR
-        run: |
-          cd backend_Django
-          docker push $ECR_REPOSITORY:$IMAGE_TAG
+          IMAGE_TAG=$(date +%s)
+          IMAGE_URI="$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build -t $IMAGE_URI backend_Django/
+          docker push $IMAGE_URI
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
       - name: Update ECS task definition
+        env:
+          IMAGE_URI: ${{ env.IMAGE_URI }}
         run: |
+          FAMILY="django-task-prod"
           TASK_DEF_FILE="task-def.json"
           NEW_TASK_DEF_FILE="new-task-def.json"
 
-          # Pobierz istniejącą definicję
-          aws ecs describe-task-definition \
-            --task-definition $TASK_FAMILY \
-            --query 'taskDefinition' > $TASK_DEF_FILE
+          # Pobierz aktualną definicję
+          aws ecs describe-task-definition --task-definition $FAMILY --query 'taskDefinition' > $TASK_DEF_FILE
 
-          # Zaktualizuj obraz Dockera w pierwszym kontenerze
-          cat $TASK_DEF_FILE | jq --arg IMAGE "$ECR_REPOSITORY:$IMAGE_TAG" \
-            '.containerDefinitions[0].image=$IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' \
-            > $NEW_TASK_DEF_FILE
+          # Zaktualizuj obraz Dockera
+          cat $TASK_DEF_FILE | jq --arg IMAGE "$IMAGE_URI" \
+            '.containerDefinitions[0].image=$IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' > $NEW_TASK_DEF_FILE
 
           # Zarejestruj nową definicję
-          aws ecs register-task-definition \
-            --cli-input-json file://$NEW_TASK_DEF_FILE
+          aws ecs register-task-definition --cli-input-json file://$NEW_TASK_DEF_FILE
 
-      - name: Deploy new ECS service
+      - name: Deploy to ECS
         run: |
           aws ecs update-service \
-            --cluster $CLUSTER_NAME \
-            --service $SERVICE_NAME \
+            --cluster django-cluster-prod \
+            --service django-service-prod \
             --force-new-deployment
