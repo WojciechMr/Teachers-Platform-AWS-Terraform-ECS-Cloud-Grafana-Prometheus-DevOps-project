@@ -29,9 +29,19 @@ jobs:
         run: |
           IMAGE_TAG=$(date +%s)
           IMAGE_URI="$ECR_REPOSITORY:$IMAGE_TAG"
+          LATEST_URI="$ECR_REPOSITORY:latest"
+
+          # Build image
           docker build -t $IMAGE_URI backend_Django/
+
+          # Tag also as latest
+          docker tag $IMAGE_URI $LATEST_URI
+
+          # Push both
           docker push $IMAGE_URI
-          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+          docker push $LATEST_URI
+
+          echo "IMAGE_URI=$LATEST_URI" >> $GITHUB_ENV
 
       - name: Update ECS task definition
         env:
