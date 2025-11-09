@@ -1,75 +1,71 @@
-# 🧑‍🏫 Teachers Platform — DevOps Project
+# Edublinkier
 
-## 📚 Opis projektu
-
-Projekt **Teachers Platform** to kompleksowe rozwiązanie DevOps, które integruje różnorodne technologie chmurowe i narzędzia automatyzacji w celu stworzenia skalowalnej i monitorowanej aplikacji edukacyjnej.  
-Platforma została zaprojektowana z myślą o nauczycielach i studentach, oferując funkcjonalności takie jak zarządzanie kursami, ocenami i komunikacją.
+**Edublinkier** is a comprehensive platform designed mainly for teachers and schools, allowing them to create AI-powered lessons and tests, manage classes and gradebooks, and plan events. This project emphasizes **full automation** and **modern DevOps practices**. 🚀
 
 ---
 
-## ☁️ Technologie i narzędzia
+## 🌐 DevOps Stack and Architecture
 
-- **AWS (Amazon Web Services)** – hosting aplikacji i bazy danych w chmurze.
-- **Terraform** – infrastruktura jako kod (IaC) do automatycznego provisioningu zasobów.
-- **Docker & ECS (Elastic Container Service)** – konteneryzacja aplikacji i ich orkiestracja w chmurze.
-- **Prometheus & Grafana** – monitorowanie aplikacji i infrastruktury z interaktywnymi dashboardami.
-- **Django** – framework webowy w Pythonie do budowy backendu.
-- **CI/CD** – automatyzacja procesów budowania, testowania i wdrażania.
+The project fully leverages modern DevOps tools and AWS cloud services:
+
+- **Terraform** – Infrastructure as Code (IaC) for:  
+  - VPC, subnets, and private security groups  
+  - ALB (Application Load Balancer)  
+  - RDS database  
+  - ECS Fargate for hosting application containers  
+  - Route53 for DNS management  
+
+- **Docker** – containerization for backend and frontend:  
+  - Automated Docker image builds  
+  - Integration with AWS ECS Fargate  
+
+- **AWS ECR** – private Docker registry:  
+  - GitHub Actions automatically pushes a new image to ECR on `main` branch commits  
+
+- **GitHub Actions** – CI/CD pipeline:  
+  - Automates build and deployment of Docker containers to AWS Fargate  
+  - Integrates with ECR, Terraform, and ECS  
+
+- **Monitoring & Observability:**  
+  - **Prometheus** – metrics collection and monitoring  
+  - **Grafana** – visualization and dashboard creation  
+
+- **DBeaver** – GUI tool for managing AWS RDS databases  
+
+💡 This setup ensures **full automation** and **production-ready deployment** on AWS.
 
 ---
 
-## 🛠️ Struktura repozytorium
+## 🖥️ Backend and Frontend
 
-/teachers-platform
-├── /terraform # Skrypty Terraform do provisioningu infrastruktury
-├── /docker # Dockerfile i konfiguracje kontenerów
-├── /django # Aplikacja Django
-├── /monitoring # Konfiguracje Prometheus i Grafana
-├── README.md # Dokumentacja projektu
-└── .gitignore # Ignorowane pliki i katalogi
-
+- **Backend:** Django REST Framework – handles application logic, APIs, and user operations  
+- **Frontend:** Django Templates – teacher user panel  
 
 ---
 
-## 🚀 Szybki start
+## 🎓 Platform Features for Teachers
 
-1. **Zainstaluj Terraform i AWS CLI**  
-   - [Terraform](https://www.terraform.io/downloads.html)  
-   - [AWS CLI](https://aws.amazon.com/cli/)
+1. **Registration and Login** – secure teacher accounts  
+2. **AI-Powered Lesson and Test Generation** – automatically create educational materials  
+3. **Class and Gradebook Management:**  
+   - Create classes and add students  
+   - Enter grades and automatically calculate averages  
+4. **Event Calendar** – schedule events with reminders  
+5. **Notes and AI Material Generation** – create and analyze teaching materials  
+6. **Assign Lessons to Classes** – manage lessons and track history  
 
-2. **Skonfiguruj AWS CLI**
-```bash
-aws configure
+---
 
-3. Zainicjuj Terraform
-cd terraform
-terraform init
+## 💡 Why Edublinkier
 
-4. Zastosuj konfigurację
-terraform apply
+This project demonstrates a combination of **full DevOps automation** and **practical educational logic**, showcasing skills in:
 
-5. Zbuduj i uruchom kontenery
-cd docker
-docker-compose up --build
+- Cloud infrastructure design and management (AWS) ☁️  
+- CI/CD automation (GitHub Actions, Terraform) ⚙️  
+- Containerization (Docker, ECS Fargate) 🐳  
+- Monitoring and observability (Prometheus, Grafana) 📊  
+- Database management (AWS RDS, DBeaver) 🗄️  
+- Building scalable web applications in Django 🖥️  
 
-6. Dostęp do aplikacji
+---
 
-Frontend: http://localhost:8000
-
-Grafana: http://localhost:3000
-
-Prometheus: http://localhost:9090
-
-📊 Monitorowanie
-
-Prometheus – zbiera metryki z aplikacji i infrastruktury.
-
-Grafana – wyświetla interaktywne dashboardy z danymi z Prometheus.
-
-🔐 Bezpieczeństwo
-
-Dane wrażliwe, takie jak hasła i klucze API, są przechowywane w pliku .env i są ignorowane przez Git dzięki wpisom w .gitignore.
-
-📄 Licencja
-
-Projekt jest dostępny na licencji MIT.
