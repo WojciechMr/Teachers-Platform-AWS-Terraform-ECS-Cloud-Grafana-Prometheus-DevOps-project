@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Dziennik klasy – {{ student_class.name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="m-0 p-0 min-h-screen w-full">
+
+<div class="min-h-screen w-full bg-gradient-to-b from-gray-800 via-gray-700 to-yellow-100 p-6">
+
+    <!-- Nagłówek dziennika -->
+    <header class="mb-4 text-center">
+        <h1 class="text-3xl font-extrabold text-white">📖 {{ student_class.name }} – Dziennik klasy</h1>
+    </header>
+
+    <!-- Przycisk Wróć -->
+    <div class="mb-4 text-center">
+        <a href="{% url 'student_manager' %}" class="text-yellow-400 underline hover:text-yellow-300 transition">← Wróć do Twoje klasy</a>
+    </div>
+
+    <!-- Lista uczniów -->
+    <div class="flex flex-col gap-6">
+        {% for sd in student_data %}
+        <div class="bg-gray-900 text-white rounded-lg shadow p-4 border border-white flex flex-col">
+
+            <!-- Nagłówek ucznia z numeracją -->
+            <div class="mb-2 flex justify-between items-center">
+                <h2 class="text-lg font-bold">{{ forloop.counter }}. {{ sd.student.first_name }} {{ sd.student.last_name }}</h2>
+                <p class="text-gray-300 font-semibold text-sm">
+                    Średnia (ważona): <span class="font-bold">{{ sd.average_weighted|default:"-" }}</span>
+                </p>
+            </div>
+
+            <!-- Tabela z ocenami z pełnymi kratkami i przyciskami akcji -->
+            {% if sd.grades %}
+            <div class="overflow-x-auto mb-4">
+                <table class="table-auto border-collapse text-xs mx-auto w-[90%]">
+                    <thead>
+                        <tr>
+                            <th class="px-3 py-1 border border-white">Ocena</th>
+                            <th class="px-3 py-1 border border-white">Opis</th>
+                            <th class="px-3 py-1 border border-white">Waga oceny</th>
+                            <th class="px-3 py-1 border border-white">Data</th>
+                            <th class="px-3 py-1 border border-white">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for g in sd.grades %}
+                        <tr>
+                            <td class="px-3 py-1 border border-white text-center">{{ g.value }}</td>
+                            <td class="px-3 py-1 border border-white">{{ g.description }}</td>
+                            <td class="px-3 py-1 border border-white text-center">{{ g.weight }}</td>
+                            <td class="px-3 py-1 border border-white text-center">{{ g.date }}</td>
+                            <td class="px-3 py-1 border border-white flex gap-1 justify-center">
+                                <a href="{% url 'edit_grade' g.id %}" class="px-2 py-0.5 bg-yellow-400 text-gray-900 rounded hover:bg-yellow-300 text-xs">Edytuj</a>
+                                <a href="{% url 'delete_grade' g.id %}" class="px-2 py-0.5 bg-red-500 text-white rounded hover:bg-red-400 text-xs">Usuń</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-400 text-xs mb-2">Brak ocen</p>
+            {% endif %}
+
+            <!-- Formularz dodawania oceny -->
+            <form method="POST" action="{% url 'add_grade' sd.student.id %}" class="flex flex-wrap gap-1 items-center justify-start text-xs mt-1">
+                {% csrf_token %}
+                <input type="number" min="1" max="6" name="value" placeholder="Ocena" class="p-1 rounded text-gray-900 w-14" required>
+                <input type="text" name="description" placeholder="Opis" class="p-1 rounded text-gray-900 w-32">
+                <input type="number" min="1" name="weight" placeholder="Waga" class="p-1 rounded text-gray-900 w-14" value="1" required>
+                <span class="text-gray-400 text-xs ml-1">waga oceny</span>
+                <button type="submit" class="px-3 bg-yellow-400 rounded text-gray-900 hover:bg-yellow-300 transition">Dodaj</button>
+            </form>
+
+        </div>
+        {% empty %}
+        <p class="text-gray-300 text-center">Brak uczniów w klasie.</p>
+        {% endfor %}
+    </div>
+</div>
+</body>
+</html>

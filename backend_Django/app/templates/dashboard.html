@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Edublinkier Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #444; text-align: center; padding: 6px; font-size: 0.9rem; font-weight: 600; }
+        td.event { background-color: #facc15; font-weight: 700; color: #111827; }
+        td.today { border: 2px solid #f59e0b; }
+        th { background-color: #374151; color: #fff; font-weight: 700; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-80 bg-gray-900 text-white flex flex-col p-4">
+        <div class="text-center font-bold text-xl mb-4 border-b border-gray-700 pb-2">
+            Edublinkier
+        </div>
+
+<!-- Kalendarz w sidebarze -->
+<div class="bg-gray-800 p-2 rounded-lg w-full">
+    <h2 class="text-center font-bold mb-2 text-sm">{{ current_month_name }} {{ current_year }}</h2>
+    <table class="w-full table-fixed text-xs">
+        <thead>
+            <tr>
+                <th class="py-1">Pn</th>
+                <th class="py-1">Wt</th>
+                <th class="py-1">Śr</th>
+                <th class="py-1">Cz</th>
+                <th class="py-1">Pt</th>
+                <th class="py-1">Sb</th>
+                <th class="py-1">Nd</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for week in calendar %}
+            <tr>
+                {% for day in week %}
+                    {% if day.day %}
+                        <td class="relative text-center font-semibold px-1 py-2 border border-gray-700
+                                   {% if day.is_today %} today bg-yellow-300 {% endif %}
+                                   {% if day.event %} event bg-yellow-500 text-white {% endif %}">
+                            {{ day.day }}
+                            {% if day.event %}
+                                <!-- Spinacz obok numeru dnia -->
+                                <span class="ml-1 text-xs align-middle">📌</span>
+                            {% endif %}
+                        </td>
+                    {% else %}
+                        <td class="border border-gray-700"></td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="mt-2 text-center text-gray-300 text-xs">📌 Kalendarz przypomni Ci dodane wydarzenia</p>
+</div>
+
+
+
+
+        <!-- Logout -->
+        <div class="mt-auto">
+            <a href="/logout" class="block bg-yellow-500 text-gray-900 py-2 px-4 rounded text-center hover:bg-yellow-600 transition mt-4">
+                Wyloguj
+            </a>
+        </div>
+    </aside>
+
+    <!-- Główna zawartość -->
+    <main class="flex-1 bg-gradient-to-b from-gray-800 via-gray-700 to-yellow-100 p-8 text-gray-900">
+        <h1 class="text-3xl font-bold mb-6 text-white">Witaj, {{ user.username }}!</h1>
+
+
+<!-- Kafelki akcji generowania -->
+<div onclick="location.href='{% url 'generate_lesson' %}'" class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+    <h2 class="text-xl font-bold mb-2">Wygeneruj swoją lekcję</h2>
+</div>
+
+<div onclick="location.href='{% url 'generate_quiz_previous' %}'" class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+    <h2 class="text-xl font-bold mb-2">Stwórz jeden sprawdzian z wygenerowanej lekcji</h2>
+</div>
+
+<div onclick="window.open('{% url 'generate_quiz_multiple' %}', '_blank')" 
+     class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+    <h2 class="text-xl font-bold mb-2">Wygeneruj sprawdzian z wybranych lekcji</h2>
+    <p>Kliknij, aby wybrać lekcje i wygenerować test.</p>
+</div>
+
+
+<a href="{% url 'print_lesson' %}" class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition block">
+    <h2 class="text-xl font-bold mb-2">Edytuj i drukuj wygenerowane lekcje i sprawdziany</h2>
+    <p class="text-gray-300">Kliknij, aby zobaczyć wszystkie lekcje oraz sprawdziany i generować PDF do druku</p>
+</a>
+
+
+<div onclick="location.href='{% url 'class_dashboard' %}'"
+     class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+    <h2 class="text-xl font-bold mb-2">🏫 Stwórz środowisko klasowe</h2>
+    <p class="text-gray-300">Twórz klasy i przypisuj do nich wygenerowane lekcje.</p>
+</div>
+
+
+<div onclick="location.href='{% url 'calendar_view' %}'"
+     class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+    <h2 class="text-xl font-bold mb-2">📅 Zaplanuj w kalendarzu</h2>
+    <p class="text-gray-300">Dodaj swoje wydarzenia, przypomnienia lub lekcje.</p>
+</div>
+
+<div onclick="location.href='{% url 'student_manager' %}'"
+     class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+    <h2 class="text-xl font-bold mb-2">📚 Uczniowie i oceny</h2>
+    <p class="text-gray-300">Zarządzaj uczniami, klasami, ocenami i notatkami.</p>
+</div>
+
+
+
+
+
+        <!-- Kafelki podglądu wygenerowanych zasobów -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div onclick="location.href='{% url 'view_generated_lessons' %}'" class="bg-yellow-500 text-gray-900 rounded-lg p-6 shadow-lg text-center hover:scale-105 transition cursor-pointer">
+                <h2 class="text-lg font-bold mb-2">Zobacz ostatnie lekcje </h2>
+                <p>Ilość wygenerowanych lekcji: {{ user.generatedlesson_set.count }}</p>
+            </div>
+            <div class="bg-yellow-500 text-gray-900 rounded-lg p-6 shadow-lg text-center hover:scale-105 transition cursor-pointer">
+                <h2 class="text-lg font-bold mb-2">Sprawdź wygenerowane sprawdziany</h2>
+                <p>Ilość wygenerowanych sprawdzianów: 5</p>
+            </div>
+            <div class="bg-yellow-500 text-gray-900 rounded-lg p-6 shadow-lg text-center hover:scale-105 transition cursor-pointer">
+                <h2 class="text-lg font-bold mb-2">Sprawdź wydrukowane lekcje</h2>
+                <p>Ilość wydrukowanych lekcji: 45</p>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

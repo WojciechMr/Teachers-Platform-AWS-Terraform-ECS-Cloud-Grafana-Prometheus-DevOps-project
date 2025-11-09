@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Twoje wygenerowane lekcje i sprawdziany</h1>
+
+<!-- Lekcje -->
+<h2 class="text-xl font-bold mt-8 mb-4">Twoje lekcje</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for lesson in lessons %}
+    <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <h3 class="text-lg font-semibold mb-2">{{ lesson.topic }}</h3>
+        <p class="text-sm text-gray-600 mb-4">{{ lesson.content|truncatechars:120 }}</p>
+        <div class="flex justify-between gap-2">
+            <a href="{% url 'edit_and_download_lesson' lesson.id %}" class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition">Edytuj</a>
+            <a href="{% url 'edit_and_download_lesson' lesson.id %}?pdf=1" target="_blank" class="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition">Drukuj PDF</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>Nie masz jeszcze żadnych wygenerowanych lekcji.</p>
+    {% endfor %}
+</div>
+
+<!-- Quizy -->
+<h2 class="text-xl font-bold mt-8 mb-4">Twoje sprawdziany</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for quiz in quizzes %}
+    <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <h3 class="text-lg font-semibold mb-2">{{ quiz.lesson.topic }}</h3>
+        <p class="text-sm text-gray-600 mb-4">{{ quiz.content|truncatechars:120 }}</p>
+        <div class="flex justify-between gap-2">
+            <a href="{% url 'edit_quiz' quiz.id %}" class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition">Edytuj</a>
+            <a href="{% url 'download_quiz_pdf' quiz.id %}" target="_blank" class="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition">Drukuj PDF</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>Nie masz jeszcze żadnych wygenerowanych sprawdzianów.</p>
+    {% endfor %}
+</div>
+{% endblock %}

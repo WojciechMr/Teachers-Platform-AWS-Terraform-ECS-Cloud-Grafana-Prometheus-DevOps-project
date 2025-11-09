@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-900 text-white py-6 px-6">
+    <h1 class="text-3xl font-bold mb-4">Edytuj lekcję: {{ lesson.topic }}</h1>
+
+    <form action="{% url 'edit_and_download_lesson' lesson.id %}" method="post" target="_blank">
+        {% csrf_token %}
+        <textarea name="content" class="w-full h-96 p-4 rounded bg-gray-800 text-white border border-gray-700 resize-none">{{ lesson.content }}</textarea>
+
+        <div class="flex gap-4 mt-4">
+            <button type="submit" 
+                    class="bg-yellow-500 text-gray-900 py-2 px-4 rounded hover:bg-yellow-600 transition">
+                Zapisz i pobierz PDF
+            </button>
+            <a href="{% url 'print_lesson' %}" 
+               class="bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-600 transition">
+               Powrót do panelu lekcji
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

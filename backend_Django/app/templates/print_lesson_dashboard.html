@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-900 text-white py-6 px-6">
+    <h1 class="text-3xl font-bold mb-2">Edytuj i drukuj wygenerowane lekcje oraz sprawdziany</h1>
+    <p class="mb-4 text-gray-300">
+        Kliknij kafelek, aby edytować lub wygenerować PDF do druku.
+    </p>
+
+    <!-- PRZYCISK WSTECZ -->
+<div class="absolute top-20 right-6">
+    <a href="{% url 'dashboard' %}" class="inline-block bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-300 transition font-semibold">
+        ← Wstecz
+    </a>
+</div>
+
+    <div class="flex flex-col md:flex-row gap-6">
+        <!-- LEWA KOLUMNA: LEKCJE -->
+        <div class="w-full md:w-1/2">
+            <h2 class="text-2xl font-bold mb-4">Twoje lekcje</h2>
+            <div class="grid grid-cols-1 gap-4">
+                {% for lesson in lessons %}
+                <div class="bg-white/5 backdrop-blur-md border border-gray-700 rounded-lg p-4 shadow-lg hover:shadow-2xl transition cursor-pointer">
+                    <h3 class="font-semibold text-lg">{{ lesson.topic }}</h3>
+                    <p class="text-sm text-gray-400">Czas trwania: {{ lesson.duration }} minut</p>
+                    <div class="mt-2 flex gap-2">
+                        <a href="{% url 'edit_and_download_lesson' lesson.id %}" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition">
+                            Edytuj / PDF
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <p>Nie wygenerowałeś jeszcze żadnej lekcji.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- PRAWA KOLUMNA: SPRAWDZIANY -->
+        <div class="w-full md:w-1/2">
+            <h2 class="text-2xl font-bold mb-4">Twoje sprawdziany</h2>
+            <div class="grid grid-cols-1 gap-4">
+                {% for quiz in quizzes %}
+                <div class="bg-white/5 backdrop-blur-md border border-gray-700 rounded-lg p-4 shadow-lg hover:shadow-2xl transition cursor-pointer">
+                    <h3 class="font-semibold text-lg">Sprawdzian #{{ quiz.id }}</h3>
+                    <p class="text-sm text-gray-400">Stworzony: {{ quiz.created_at|date:"d.m.Y H:i" }}</p>
+                    <div class="mt-2 flex gap-2">
+                        <a href="{% url 'edit_and_download_quiz' quiz.id %}" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
+                            Edytuj / PDF
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <p>Nie wygenerowałeś jeszcze żadnego sprawdzianu.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

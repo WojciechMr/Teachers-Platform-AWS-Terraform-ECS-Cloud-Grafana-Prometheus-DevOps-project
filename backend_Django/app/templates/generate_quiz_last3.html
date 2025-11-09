@@ -1,0 +1,8 @@
+<h1>Wygeneruj sprawdzian z 3 ostatnich lekcji</h1>
+<form method="post">
+    {% csrf_token %}
+    <label>Liczba pytań:
+        <input type="number" name="num_questions" value="10" max="35">
+    </label>
+    <button type="submit">Generuj quiz</button>
+</form>

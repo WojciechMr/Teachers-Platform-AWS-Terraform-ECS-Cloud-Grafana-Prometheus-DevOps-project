@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Edublinkier - Platforma dla Nauczycieli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-yellow-100 via-yellow-200 to-yellow-300 flex flex-col min-h-screen">
+
+    <!-- Banner u góry -->
+    <section class="flex w-full overflow-hidden">
+        <div class="w-1/3">
+            <img src="{% static 'images/dziennik1.jpg' %}" alt="Dziennik" class="w-full h-96 object-cover">
+        </div>
+        <div class="w-1/3">
+            <img src="{% static 'images/klasa.jpg' %}" alt="Klasa" class="w-full h-96 object-cover">
+        </div>
+        <div class="w-1/3">
+            <img src="{% static 'images/tablica.jpg' %}" alt="Tablica" class="w-full h-96 object-cover">
+        </div>
+    </section>
+
+    <!-- Nagłówek główny -->
+    <header class="text-center py-16">
+        <h1 class="text-5xl font-bold text-gray-800 mb-4">Edublinkier Platform</h1>
+        <p class="text-xl text-gray-700 max-w-xl mx-auto">
+            Ucz łatwiej, szybciej i skuteczniej! Edublinkier wspiera nauczycieli w tworzeniu lekcji i kartkówek z pomocą sztucznej inteligencji.
+        </p>
+        <div class="mt-8 space-x-4">
+            <a href="/register" class="bg-white text-yellow-700 font-bold py-2 px-6 rounded shadow hover:bg-yellow-50 transition">Rejestracja</a>
+            <a href="/login" class="bg-white text-yellow-700 font-bold py-2 px-6 rounded shadow hover:bg-yellow-50 transition">Logowanie</a>
+        </div>
+    </header>
+
+    <!-- Sekcja co robi platforma -->
+    <section class="text-center px-6 mb-16">
+        <h2 class="text-3xl font-bold mb-6 text-gray-800">Dlaczego warto korzystać z Edublinkier?</h2>
+        <p class="text-gray-700 max-w-2xl mx-auto text-lg mb-4">
+            Twórz angażujące lekcje w kilka sekund – Edublinkier generuje materiały edukacyjne dopasowane do Twoich uczniów.  
+            Planuj lekcje szybciej, bez zbędnego stresu i godzin spędzonych nad przygotowaniem materiałów.
+        </p>
+        <p class="text-gray-700 max-w-2xl mx-auto text-lg mb-4">
+            Twórz kartkówki i testy automatycznie na podstawie wygenerowanych lekcji. Monitoruj postępy uczniów i rozwijaj tematy w sposób, który naprawdę angażuje klasę.
+        </p>
+        <p class="text-gray-700 max-w-2xl mx-auto text-lg">
+            Edublinkier to Twój codzienny asystent w nauczaniu – oszczędzaj czas, inspiruj uczniów i spraw, by edukacja była przyjemnością!
+        </p>
+    </section>
+
+</body>
+</html>

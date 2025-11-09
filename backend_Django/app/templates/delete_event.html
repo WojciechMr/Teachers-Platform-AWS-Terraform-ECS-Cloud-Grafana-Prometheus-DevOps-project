@@ -1,0 +1,8 @@
+<h2 class="text-xl font-bold mb-4">Usuń wydarzenie</h2>
+<p>Czy na pewno chcesz usunąć <strong>{{ event.title }}</strong>?</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded">Usuń</button>
+  <a href="{% url 'calendar' %}" class="ml-2 text-gray-500">Anuluj</a>
+</form>

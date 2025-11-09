@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Wybierz lekcje do quizu - Edublinkier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-800 text-white min-h-screen p-8">
+
+<div class="max-w-4xl mx-auto bg-gray-900 p-6 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold mb-4">Wybierz lekcje do wygenerowania quizu</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {% for lesson in lessons %}
+            <label class="bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600 transition flex items-center">
+                <input type="checkbox" name="lessons" value="{{ lesson.id }}" class="mr-2">
+                <span>{{ lesson.topic }} ({{ lesson.created_at|date:"d-m-Y H:i" }})</span>
+            </label>
+            {% empty %}
+            <p>Nie masz jeszcze wygenerowanych lekcji.</p>
+            {% endfor %}
+        </div>
+
+        <div class="mb-4">
+            <label class="block mb-2">Liczba pytań w quizie (max 35):</label>
+            <input type="number" name="num_questions" min="1" max="35" class="p-2 rounded w-full text-gray-900" required>
+        </div>
+
+        <button type="submit" class="bg-yellow-500 text-gray-900 px-4 py-2 rounded hover:bg-yellow-600 transition">
+            Generuj quiz
+        </button>
+    </form>
+</div>
+
+</body>
+</html>
