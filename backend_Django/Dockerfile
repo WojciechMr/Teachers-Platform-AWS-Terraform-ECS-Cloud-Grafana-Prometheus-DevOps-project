@@ -19,8 +19,10 @@ RUN apt-get update && apt-get install -y \
     libgdk-pixbuf2.0-dev \
     libffi-dev \
     shared-mime-info \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+    wget \
+    fonts-dejavu-core \
+    fonts-liberation \
+&& rm -rf /var/lib/apt/lists/*
 
 # --- Skopiuj plik requirements i zainstaluj zależności ---
 COPY requirements.txt .
