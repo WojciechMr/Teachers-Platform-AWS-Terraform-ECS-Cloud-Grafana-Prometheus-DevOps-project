@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Wygenerowane lekcje</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-800 text-white p-8 min-h-screen">
+
+<h1 class="text-3xl font-bold mb-6">Twoje ostatnie wygenerowane lekcje</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for lesson in lessons %}
+        <div class="bg-gray-900 p-6 rounded shadow">
+            <h2 class="text-xl font-bold mb-2">{{ lesson.topic }}</h2>
+            
+            <!-- Edycja treści lekcji -->
+            <form method="POST" action="{% url 'edit_and_download_lesson' lesson.id %}" target="_blank" class="mb-2">
+                {% csrf_token %}
+                <textarea name="content" class="w-full p-2 mb-2 rounded text-gray-900" rows="6">{{ lesson.content }}</textarea>
+                
+                <button type="submit"
+                        class="bg-green-500 text-gray-900 px-4 py-2 rounded hover:bg-green-600 transition">
+                    Edytuj i pobierz PDF
+                </button>
+            </form>
+
+            <!-- Formularz generowania sprawdzianu -->
+            <form method="POST" action="{% url 'generate_quiz_from_lesson' lesson.id %}" class="flex gap-2">
+                {% csrf_token %}
+                <input type="number" name="num_questions" value="5" min="1" max="20"
+                       class="flex-1 p-2 rounded text-gray-900" required>
+                <button type="submit"
+                        class="bg-yellow-500 text-gray-900 px-4 py-2 rounded hover:bg-yellow-600 transition">
+                    Generuj sprawdzian
+                </button>
+            </form>
+        </div>
+    {% empty %}
+        <p>Nie masz jeszcze żadnych wygenerowanych lekcji.</p>
+    {% endfor %}
+</div>
+
+</body>
+</html>

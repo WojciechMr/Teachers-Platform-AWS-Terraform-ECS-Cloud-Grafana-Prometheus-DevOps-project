@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Edublinkier - Logowanie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Slider - zdjęcia pełne, bez przycinania */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            overflow: hidden;
+            background: #000;
+        }
+        .slider-container img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* pełne zdjęcia, zachowane proporcje */
+            background-color: #000; /* czarne tło wokół */
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .slider-container img.active {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen w-full bg-gray-900 overflow-hidden">
+
+    <!-- LEWY PANEL (logowanie) -->
+    <div class="w-1/3 bg-gray-900 text-white p-12 flex flex-col justify-center relative">
+
+        <a href="/" class="absolute top-8 left-8 bg-gray-800 rounded-xl p-2 hover:bg-gray-700 transition">
+            <span class="text-2xl">←</span>
+        </a>
+
+        <h2 class="text-4xl font-bold mb-3">Login</h2>
+        <p class="text-gray-400 mb-10">Zaloguj się, aby uzyskać dostęp do swojego konta</p>
+
+        <form action="/login/" method="post" class="flex flex-col space-y-6">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Nazwa użytkownika</label>
+                <input type="text" name="username"
+                       class="w-full px-4 py-2 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7678ed]">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Hasło</label>
+                <input type="password" name="password"
+                       class="w-full px-4 py-2 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7678ed]">
+                <a href="#" class="text-xs text-gray-400 hover:text-gray-300 mt-2 inline-block">Zapomniałeś hasła?</a>
+            </div>
+            <button type="submit"
+                    class="bg-[#7678ed] hover:bg-[#6b6ce0] py-2 rounded-md font-bold transition">
+                Zaloguj się
+            </button>
+        </form>
+
+        <p class="text-gray-400 text-sm mt-8">
+            Nie masz konta?
+            <a href="/register" class="text-[#f7b801] hover:text-yellow-400 font-semibold">Zarejestruj się</a>
+        </p>
+    </div>
+
+    <!-- PRAWY PANEL -->
+    <div class="w-2/3 relative flex flex-col text-white overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#7678ed] to-[#f7b801] opacity-80"></div>
+
+<!-- Tekst powitalny -->
+<div class="relative z-10 bg-gradient-to-t from-gray-800 via-gray-700 to-gray-300 p-10 shadow-lg backdrop-blur-sm rounded-xl">
+    <h1 class="text-5xl font-bold mb-4 text-[#f7b801] drop-shadow-lg 
+               tracking-wide stroke-[1px] stroke-black">
+        Witamy w <span class="text-[#f7b801] stroke-[1.5px] stroke-black">Edublinkier</span>!
+    </h1>
+    <p class="text-gray-100 text-lg max-w-2xl leading-relaxed font-semibold">
+        Twórz lekcje, testy i materiały w kilka sekund dzięki AI.<br>
+        Zarządzaj klasami, dziennikiem, uczniami i ocenami w jednym miejscu.<br>
+        Planuj wydarzenia w terminarzu i otrzymuj przypomnienia.<br>
+        Wrzucaj własne dokumenty – AI przerobi je na testy otwarte i zamknięte.<br>
+        Generuj sprawdziany, materiały do czytania ze zrozumieniem i lekcje automatycznie.<br>
+        <span class="font-bold text-[#f7b801] stroke-[1.5px] stroke-black">Edublinkier</span>.<br>
+        Twoja inteligentna platforma edukacyjna.
+    </p>
+</div>
+
+        <!-- Slider -->
+        <div class="slider-container relative flex-1">
+            {% for img in images %}
+                <img src="{% static 'images/screens/' %}{{ img }}" 
+                     alt="Zrzut {{ forloop.counter }}" 
+                     class="{% if forloop.first %}active{% endif %}">
+            {% endfor %}
+        </div>
+
+        <div class="absolute bottom-6 right-6 bg-white/20 rounded-xl p-3 cursor-pointer hover:bg-white/30 transition z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 4v6h6M20 20v-6h-6M4 20l5.64-5.64M20 4l-5.64 5.64" />
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slider-container img');
+        let currentIndex = 0;
+
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[index].classList.add('active');
+        }
+
+        setInterval(() => {
+            currentIndex = (currentIndex + 1) % slides.length;
+            showSlide(currentIndex);
+        }, 4000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Edublinkier – Zarządzaj klasą</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="m-0 p-0 min-h-screen w-full">
+
+<div class="min-h-screen w-full bg-gradient-to-b from-gray-800 via-gray-700 to-yellow-100 p-10">
+
+    <!-- Nagłówek dashboardu -->
+    <header class="mb-8">
+        <h1 class="text-4xl font-extrabold text-white text-center">📚 {{ student_class.name }} – Zarządzaj uczniami</h1>
+    </header>
+
+    <!-- Przycisk Wróć -->
+    <div class="mb-6 text-center">
+        <a href="{% url 'student_manager' %}" class="text-yellow-400 underline hover:text-yellow-300 transition">← Wróć</a>
+    </div>
+
+    <!-- Tabela uczniów -->
+    <div class="overflow-x-auto bg-gray-900 text-white rounded-xl shadow mb-6 border-2 border-white">
+        <table class="table-auto w-full text-left border-collapse">
+            <thead class="bg-black">
+                <tr>
+                    <th class="px-4 py-2 border border-white">#</th>
+                    <th class="px-4 py-2 border border-white">Imię</th>
+                    <th class="px-4 py-2 border border-white">Nazwisko</th>
+                    <th class="px-4 py-2 border border-white">Średnia</th>
+                    <th class="px-4 py-2 border border-white">Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sd in student_data %}
+                <tr class="hover:bg-gray-700">
+                    <td class="px-4 py-2 border border-white text-center">{{ forloop.counter }}.</td>
+                    <td class="px-4 py-2 border border-white">{{ sd.student.first_name }}</td>
+                    <td class="px-4 py-2 border border-white">{{ sd.student.last_name }}</td>
+                    <td class="px-4 py-2 border border-white text-center font-bold">{{ sd.average|default:"-" }}</td>
+                    <td class="px-4 py-2 border border-white flex gap-2">
+                        <a href="{% url 'edit_student' sd.student.id %}" class="px-3 py-1 bg-yellow-400 rounded text-gray-900 hover:bg-yellow-300 transition">Edytuj</a>
+                        <a href="{% url 'delete_student' sd.student.id %}" class="px-3 py-1 bg-red-500 rounded text-white hover:bg-red-400 transition">Usuń</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-4 py-4 border border-white text-center text-gray-300">Brak uczniów w klasie</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Formularz dodawania ucznia -->
+    <div class="bg-gray-900 text-white rounded-xl p-6 mb-6 shadow-lg border-2 border-white max-w-3xl mx-auto">
+        <h2 class="text-2xl font-bold mb-4 text-yellow-400 text-center">Dodaj nowego ucznia</h2>
+        <form method="POST" action="{% url 'view_student_class' student_class.id %}" class="flex flex-col sm:flex-row gap-4">
+            {% csrf_token %}
+            <input type="text" name="first_name" placeholder="Imię" class="p-3 rounded-xl text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:outline-none flex-1" required>
+            <input type="text" name="last_name" placeholder="Nazwisko" class="p-3 rounded-xl text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:outline-none flex-1" required>
+            <button type="submit" class="p-3 bg-yellow-400 text-gray-900 rounded-xl font-bold hover:bg-yellow-300 transition">Dodaj ucznia</button>
+        </form>
+    </div>
+
+    <!-- Kafelek Zarządzaj dziennikiem -->
+    <div class="text-center mt-8">
+        <a h

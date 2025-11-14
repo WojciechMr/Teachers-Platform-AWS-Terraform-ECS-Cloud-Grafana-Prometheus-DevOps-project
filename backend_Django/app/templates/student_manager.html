@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+
+    <!-- Przycisk Wróć do dashboard -->
+    <div class="mb-4">
+        <a href="{% url 'dashboard' %}" class="text-yellow-400 underline hover:text-yellow-300 transition">
+            ← Wróć do dashboard
+        </a>
+    </div>
+
+    <!-- Nagłówek strony -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Twoje klasy</h1>
+        <!-- Jedyny przycisk dodawania klasy -->
+        <a href="{% url 'create_student_class' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            ➕ Dodaj klasę
+        </a>
+    </div>
+
+    <!-- Kafelki klas -->
+    {% if classes %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for class in classes %}
+            <div class="bg-white rounded-lg shadow hover:shadow-xl transition p-4 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold mb-2">{{ class.name }}</h2>
+                    {% if class.subject %}
+                        <p class="text-gray-600 mb-2">{{ class.subject }}</p>
+                    {% endif %}
+                    <p class="text-gray-500 text-sm">Utworzono: {{ class.created_at|date:"d-m-Y" }}</p>
+                </div>
+                <div class="mt-4 flex flex-col gap-2">
+                    <a href="{% url 'view_student_class' class.id %}" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-center">
+                        👩‍🎓 Zarządzaj uczniami. Średnia ocen
+                    </a>
+                    <a href="{% url 'class_journal' class.id %}" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 text-center">
+                        📒 Dziennik klasy
+                    </a>
+                    <!-- NOWY PRZYCISK USUŃ KLASĘ -->
+                    <form method="POST" onsubmit="return confirm('Czy na pewno chcesz usunąć tę klasę?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_class_id" value="{{ class.id }}">
+                        <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-center w-full">
+                            ❌ Usuń klasę
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Nie masz jeszcze żadnych klas. Użyj przycisku powyżej, aby dodać pierwszą klasę.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

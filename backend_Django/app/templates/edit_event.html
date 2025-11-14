@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Edytuj wydarzenie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-gray-800 via-gray-700 to-yellow-100 min-h-screen p-8">
+    <a href="{% url 'calendar_view' %}" class="text-yellow-400 underline">← Wróć do kalendarza</a>
+    <h1 class="text-3xl font-bold text-white mb-6">✏️ Edytuj wydarzenie</h1>
+
+    <form method="POST" class="bg-gray-800 text-white rounded-lg p-6 shadow-lg">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="mt-4 bg-yellow-500 text-gray-900 px-4 py-2 rounded hover:bg-yellow-600 transition">
+            Zapisz zmiany
+        </button>
+    </form>
+</body>
+</html>

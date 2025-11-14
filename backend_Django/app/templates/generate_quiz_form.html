@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Generuj sprawdzian</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-800 text-white flex items-center justify-center min-h-screen">
+
+<div class="bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-6 text-center">Generuj sprawdzian z lekcji: {{ lesson.topic }}</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label class="block mb-2">Liczba pytań:</label>
+        <input type="number" name="num_questions" value="5" min="1" max="20" class="w-full mb-4 p-2 rounded text-gray-900" required>
+
+        <button type="submit" class="w-full bg-yellow-500 text-gray-900 py-2 rounded hover:bg-yellow-600 transition">
+            Generuj sprawdzian
+        </button>
+    </form>
+
+    <div class="mt-4 text-center">
+        <a href="{% url 'view_generated_lessons' %}" class="text-yellow-400 hover:underline">Powrót do lekcji</a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Wynik lekcji - Edublinkier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-800 text-white min-h-screen p-8">
+
+<div class="max-w-4xl mx-auto bg-gray-900 p-6 rounded-lg shadow-lg">
+    <!-- Temat lekcji -->
+    <h1 class="text-2xl font-bold mb-4">{{ topic }} ({{ duration }} min)</h1>
+
+    <hr class="border-gray-700 my-4">
+
+    <!-- Wygenerowana treść lekcji -->
+    <div class="whitespace-pre-line text-gray-200 mb-6">
+        {{ lesson_html|safe }}
+    </div>
+
+    <!-- Przycisk do przejścia do edycji / PDF -->
+    <div class="flex justify-center gap-4 mt-6">
+        <a href="{% url 'edit_and_download_lesson' lesson.id %}"
+           class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition font-semibold">
+           Przejdź do Edytowania i Drukowania
+        </a>
+        <a href="{% url 'generate_lesson' %}"
+           class="bg-yellow-500 text-gray-900 py-2 px-4 rounded hover:bg-yellow-600 transition font-semibold">
+           Wygeneruj inną lekcję
+        </a>
+        <a href="{% url 'dashboard' %}"
+           class="bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-600 transition font-semibold">
+           Powrót do dashboard
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

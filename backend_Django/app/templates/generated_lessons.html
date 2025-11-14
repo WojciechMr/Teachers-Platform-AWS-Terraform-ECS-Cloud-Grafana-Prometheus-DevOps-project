@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Twoje wygenerowane lekcje</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-800 text-white min-h-screen p-8">
+
+    <h1 class="text-3xl font-bold mb-6">Twoje ostatnie wygenerowane lekcje</h1>
+
+    {% if lessons %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for lesson in lessons %}
+                <div class="bg-gray-900 p-4 rounded shadow hover:shadow-lg transition">
+                    <h2 class="text-xl font-semibold mb-2">{{ lesson.topic }}</h2>
+                    <p class="mb-2"><strong>Czas trwania:</strong> {{ lesson.duration }} minut</p>
+                    <details class="bg-gray-800 p-2 rounded">
+                        <summary class="cursor-pointer">Zobacz zawartość lekcji</summary>
+                        <pre class="whitespace-pre-wrap mt-2">{{ lesson.content }}</pre>
+                    </details>
+                    <p class="text-gray-400 text-sm mt-2">Data utworzenia: {{ lesson.created_at|date:"Y-m-d H:i" }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Nie masz jeszcze żadnych wygenerowanych lekcji.</p>
+    {% endif %}
+
+    <div class="mt-6">
+        <a href="{% url 'dashboard' %}" class="bg-yellow-500 text-gray-900 px-4 py-2 rounded hover:bg-yellow-600 transition">Powrót do panelu</a>
+    </div>
+
+</body>
+</html>

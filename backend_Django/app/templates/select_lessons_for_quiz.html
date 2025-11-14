@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto bg-gray-900 p-6 rounded-lg shadow-lg text-white">
+    <h1 class="text-2xl font-bold mb-4">Wybierz lekcje do sprawdzianu</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for lesson in lessons %}
+            <label class="bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition flex items-center gap-2">
+                <input type="checkbox" name="lessons" value="{{ lesson.id }}" class="form-checkbox h-5 w-5">
+                <div>
+                    <p class="font-semibold">{{ lesson.topic }}</p>
+                    <p class="text-sm text-gray-400">Czas trwania: {{ lesson.duration }} min</p>
+                </div>
+            </label>
+            {% endfor %}
+        </div>
+        <button type="submit" class="mt-4 bg-yellow-500 text-gray-900 py-2 px-4 rounded hover:bg-yellow-600 transition">
+            Generuj sprawdzian
+        </button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Stwórz nową klasę</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-yellow-100 flex items-center justify-center p-8">
+
+    <div class="bg-gray-800 text-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+        <h1 class="text-3xl font-bold mb-6 text-center">➕ Utwórz nową klasę</h1>
+
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            
+            <div>
+                <label for="id_name" class="block mb-2 font-semibold">Nazwa klasy</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ form.name.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="w-full bg-yellow-500 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition mt-4">
+                Stwórz klasę
+            </button>
+        </form>
+
+        <a href="{% url 'class_dashboard' %}" class="block text-center text-yellow-400 underline mt-6">
+            ← Wróć do środowiska klasowego
+        </a>
+    </div>
+
+</body>
+</html>
