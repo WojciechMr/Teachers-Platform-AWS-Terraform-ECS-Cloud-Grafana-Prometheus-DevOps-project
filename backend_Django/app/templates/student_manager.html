@@ -38,6 +38,14 @@
                     <a href="{% url 'class_journal' class.id %}" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 text-center">
                         📒 Dziennik klasy
                     </a>
+                    <!-- NOWY PRZYCISK USUŃ KLASĘ -->
+                    <form method="POST" onsubmit="return confirm('Czy na pewno chcesz usunąć tę klasę?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_class_id" value="{{ class.id }}">
+                        <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-center w-full">
+                            ❌ Usuń klasę
+                        </button>
+                    </form>
                 </div>
             </div>
             {% endfor %}

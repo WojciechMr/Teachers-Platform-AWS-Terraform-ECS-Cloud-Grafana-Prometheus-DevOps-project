@@ -37,6 +37,11 @@ from .models import CalendarEvent
 from .models import StudentClass, Student, Grade 
 from .forms import StudentClassForm
 from .forms import StudentForm, GradeForm
+import docx2txt
+import PyPDF2
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from io import BytesIO
+from weasyprint import HTML
 # ---------------------
 # REJESTRACJA FONTU PDF UTF-8
 # ---------------------
@@ -63,8 +68,25 @@ def safe_str(text):
 def health(request):
     return HttpResponse("OK", status=200)
 
+
+def natural_sort_key(s):
+    """Sortowanie naturalne, numeryczne np. screen1.png, screen2.png, screen10.png"""
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
+
+
 def home(request):
-    return render(request, 'home.html')
+    # Ścieżka do folderu z obrazkami (w STATICFILES_DIRS)
+    images_dir = os.path.join(settings.BASE_DIR, 'app', 'static', 'images', 'screens')
+
+    # Pobierz wszystkie pliki .png
+    try:
+        images = [f for f in os.listdir(images_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+        images.sort(key=natural_sort_key)  # sortowanie numeryczne
+    except FileNotFoundError:
+        images = []
+
+    # Przekaż listę do template
+    return render(request, 'home.html', {'images': images})
 
 # ---------------------
 # FUNKCJA DO FORMATOWANIA LEKCJI
@@ -86,6 +108,10 @@ def clean_markdown_lesson(text):
             cleaned_lines.append(line)
     return "<br>".join(cleaned_lines)
 
+from django.core.mail import EmailMultiAlternatives
+from django.core.mail import send_mail
+from django.conf import settings
+from django.template.loader import render_to_string
 
 def register_view(request):
     if request.method == "POST":
@@ -103,6 +129,23 @@ def register_view(request):
 
         user = User.objects.create_user(username=username, email=email, password=password)
         user.save()
+
+        # Wysyłka maila powitalnego
+        subject = "Witamy w Edublinkier – Twoja przygoda z nauką zaczyna się teraz!"
+        from_email = settings.EMAIL_HOST_USER
+        to = [user.email]
+
+        # Renderowanie HTML-owego maila
+        html_content = render_to_string("welcome_email.html", {"username": user.username})
+        text_content = f"Cześć {user.username}! Witamy w Edublinkier!"
+
+        try:
+            msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+        except Exception as e:
+            print("Błąd wysyłki maila:", e)
+
         messages.success(request, "Konto utworzone! Możesz się zalogować.")
         return redirect("login")
 
@@ -137,15 +180,15 @@ def dashboard_view(request):
 # ---------------------
 def generate_lesson_with_openai(topic, duration):
     prompt = f"""
-Jesteś nauczycielem i tworzysz gotowy plan lekcji dla uczniów.
+Jesteś nauczycielem i tworzysz lekcji dla uczniów żeby dobrze ją przeprowadzić.
 Temat lekcji: {topic}
 Czas trwania: {duration} minut (20 lub 45)
 Podziel plan na sekcje: 
-1. Wprowadzenie – opowiedz o temacie, najważniejsze zagadnienia związane z tematem, omówienie oraz analiza,
-2. Szczegóły – Szczegółowy opis tego co wygenerowałeś, 
-3. Ćwiczenia – Przykłady, rozwiązania, przedstawienie lekcji, opis i rozszerzenie wygenerowanych wyżej punktów,
-4. Zakończenie – podsumowanie, refleksja, pytania sprawdzające.
-Na końcu dodaj ćwiczenia dla uczniów, listę materiałów potrzebnych i krótkie uwagi dla nauczyciela.
+1. Wprowadzenie – opowiedz o temacie, najważniejsze zagadnienia związane z tematem, omówienie oraz szczegółowa analiza,
+2. Szczegóły – Podaj Szczegółowy opis tego co wygenerowałeś wszystko obszernie najlepiej tak jakbys mial poprowadzic lekcje jako nauczyciel, 
+3. Ćwiczenia – Przykłady, rozwiązania, opis i rozszerzenie wygenerowanych wyżej punktów,
+4. Zakończenie – podsumowanie, refleksja, naistotniejsze i najwazniejsze tematy związane z wygeneorwanym wyżej tekstem
+Na końcu ewentualna praca domowa 
 Formatuj w formie punktów.
 """
     try:
@@ -699,6 +742,13 @@ def view_class(request, class_id):
         "lesson_preview": lesson_preview
     })
 
+@login_required(login_url='/login/')
+def delete_class(request, class_id):
+    school_class = get_object_or_404(SchoolClass, id=class_id, user=request.user)
+    school_class.delete()
+    messages.success(request, f"Klasa '{school_class.name}' została usunięta.")
+    return redirect('class_dashboard')
+
 
 @login_required(login_url='/login/')
 def remove_lesson_from_class(request, class_lesson_id):
@@ -794,6 +844,9 @@ def clean_quiz_text(text):
     return "\n".join(cleaned_lines)
 
 
+from datetime import date
+from .models import CalendarEvent
+
 @login_required(login_url='/login/')
 def dashboard_view(request):
     today = date.today()
@@ -829,11 +882,19 @@ def dashboard_view(request):
                 })
         calendar_data.append(week_data)
 
+    # Dodatkowo pobieramy nadchodzące wydarzenia do wyświetlenia pod kalendarzem
+    upcoming_events = CalendarEvent.objects.filter(
+        user=request.user,
+        date__gte=today
+    ).order_by('date')[:5]  # np. 5 najbliższych wydarzeń
+
     return render(request, "dashboard.html", {
         "current_month_name": current_month_name,
         "current_year": current_year,
         "calendar": calendar_data,
+        "upcoming_events": upcoming_events,
     })
+
 
 
 
@@ -923,11 +984,20 @@ def add_grade(request, student_id):
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import StudentClass, Student, Grade
 
-@login_required(login_url='/login/')
+@login_required
 def student_manager(request):
-    # Pobieramy wszystkie klasy użytkownika
     classes = StudentClass.objects.filter(user=request.user)
-    return render(request, "student_manager.html", {"classes": classes})
+
+    if request.method == 'POST':
+        class_id = request.POST.get('delete_class_id')
+        if class_id:
+            school_class = get_object_or_404(StudentClass, id=class_id, user=request.user)
+            school_class.delete()
+            messages.success(request, f"Klasa '{school_class.name}' została usunięta.")
+            return redirect('student_manager')
+
+    return render(request, 'student_manager.html', {'classes': classes})
+
 
 @login_required
 def view_student_class(request, class_id):
@@ -1036,3 +1106,106 @@ def delete_grade(request, grade_id):
     grade.delete()
     messages.success(request, "Ocena została usunięta.")
     return redirect('class_journal', class_id=class_id)
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import HttpResponse
+import openai
+import docx2txt
+import PyPDF2
+from weasyprint import HTML, CSS
+
+@login_required(login_url="/login/")
+def reading_comprehension_view(request):
+    generated = None
+    article_text = ""
+    open_questions = 12
+    mc_questions = 15
+
+    if request.method == "POST":
+        article_text = request.POST.get("article_text", "").strip()
+        open_questions = int(request.POST.get("open_questions", 12))
+        mc_questions = int(request.POST.get("mc_questions", 15))
+        uploaded_file = request.FILES.get("file")
+
+        # 🔸 Jeśli użytkownik wrzucił plik
+        if uploaded_file:
+            try:
+                if uploaded_file.name.endswith(".txt"):
+                    article_text = uploaded_file.read().decode("utf-8")
+                elif uploaded_file.name.endswith(".docx"):
+                    article_text = docx2txt.process(uploaded_file)
+                elif uploaded_file.name.endswith(".pdf"):
+                    pdf_reader = PyPDF2.PdfReader(uploaded_file)
+                    article_text = "\n".join([page.extract_text() for page in pdf_reader.pages])
+                else:
+                    messages.error(request, "Nieobsługiwany format pliku. Użyj .txt, .docx lub .pdf")
+            except Exception as e:
+                messages.error(request, f"Błąd przy wczytywaniu pliku: {e}")
+
+        if not article_text:
+            messages.error(request, "Wklej tekst lub załaduj plik.")
+        else:
+            # 🔹 Tworzymy prompt
+            prompt = f"""
+Jesteś nauczycielem. Przygotuj ćwiczenie z czytania ze zrozumieniem
+na podstawie poniższego tekstu:
+
+{article_text}
+
+Wygeneruj:
+1️⃣ Krótkie streszczenie tekstu.
+2️⃣ {open_questions} pytań otwartych (open-ended).
+3️⃣ {mc_questions} pytań wielokrotnego wyboru z trzema opcjami odpowiedzi.
+4️⃣ Klucz odpowiedzi.
+"""
+
+            try:
+                response = openai.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful educational assistant."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.7,
+                    max_tokens=1500
+                )
+                generated = response.choices[0].message.content
+            except Exception as e:
+                messages.error(request, f"Błąd generowania: {e}")
+
+        # 🔹 Pobieranie PDF
+        if request.POST.get("download_pdf"):
+            pdf_content = request.POST.get("generated_text", generated)
+            html_string = f"""
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@page {{ size: A4; margin: 2cm; }}
+body {{ font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.4; }}
+h1 {{ font-size: 12pt; color: #333; }}
+pre {{ white-space: pre-wrap; word-wrap: break-word; font-size: 10pt; }}
+</style>
+</head>
+<body>
+<h1>Ćwiczenie z czytania ze zrozumieniem</h1>
+<pre>{pdf_content}</pre>
+</body>
+</html>
+"""
+            pdf_file = HTML(string=html_string).write_pdf(stylesheets=[CSS(string="body { font-family: Arial; }")])
+            response = HttpResponse(pdf_file, content_type='application/pdf')
+            response['Content-Disposition'] = 'inline; filename="reading_comprehension.pdf"'
+            return response
+
+    return render(request, "reading_comprehension.html", {
+        "generated": generated,
+        "article_text": article_text,
+        "open_questions": open_questions,
+        "mc_questions": mc_questions,
+    })
+
+

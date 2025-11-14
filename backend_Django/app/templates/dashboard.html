@@ -21,48 +21,62 @@
             Edublinkier
         </div>
 
-<!-- Kalendarz w sidebarze -->
-<div class="bg-gray-800 p-2 rounded-lg w-full">
-    <h2 class="text-center font-bold mb-2 text-sm">{{ current_month_name }} {{ current_year }}</h2>
-    <table class="w-full table-fixed text-xs">
-        <thead>
-            <tr>
-                <th class="py-1">Pn</th>
-                <th class="py-1">Wt</th>
-                <th class="py-1">Śr</th>
-                <th class="py-1">Cz</th>
-                <th class="py-1">Pt</th>
-                <th class="py-1">Sb</th>
-                <th class="py-1">Nd</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for week in calendar %}
-            <tr>
-                {% for day in week %}
-                    {% if day.day %}
-                        <td class="relative text-center font-semibold px-1 py-2 border border-gray-700
-                                   {% if day.is_today %} today bg-yellow-300 {% endif %}
-                                   {% if day.event %} event bg-yellow-500 text-white {% endif %}">
-                            {{ day.day }}
-                            {% if day.event %}
-                                <!-- Spinacz obok numeru dnia -->
-                                <span class="ml-1 text-xs align-middle">📌</span>
+        <!-- Kalendarz w sidebarze -->
+        <div class="bg-gray-800 p-2 rounded-lg w-full mb-4">
+            <h2 class="text-center font-bold mb-2 text-sm">{{ current_month_name }} {{ current_year }}</h2>
+            <table class="w-full table-fixed text-xs">
+                <thead>
+                    <tr>
+                        <th class="py-1">Pn</th>
+                        <th class="py-1">Wt</th>
+                        <th class="py-1">Śr</th>
+                        <th class="py-1">Cz</th>
+                        <th class="py-1">Pt</th>
+                        <th class="py-1">Sb</th>
+                        <th class="py-1">Nd</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in calendar %}
+                    <tr>
+                        {% for day in week %}
+                            {% if day.day %}
+                                <td class="relative text-center font-semibold px-1 py-2 border border-gray-700
+                                           {% if day.is_today %} today bg-yellow-300 {% endif %}
+                                           {% if day.event %} event bg-yellow-500 text-white {% endif %}">
+                                    {{ day.day }}
+                                    {% if day.event %}
+                                        <span class="ml-1 text-xs align-middle">📌</span>
+                                    {% endif %}
+                                </td>
+                            {% else %}
+                                <td class="border border-gray-700"></td>
                             {% endif %}
-                        </td>
-                    {% else %}
-                        <td class="border border-gray-700"></td>
-                    {% endif %}
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <p class="mt-2 text-center text-gray-300 text-xs">📌 Kalendarz przypomni Ci dodane wydarzenia</p>
-</div>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="mt-2 text-center text-gray-300 text-xs">📌 Kalendarz przypomni Ci dodane wydarzenia</p>
 
+            <!-- Lista nadchodzących wydarzeń -->
+            <div class="mt-4">
+                <h3 class="text-center font-bold mb-2 text-sm text-yellow-300">📅 Zaplanowane wydarzenia</h3>
+                {% if upcoming_events %}
+                    <ul class="text-xs text-gray-200">
+                        {% for event in upcoming_events %}
+                            <li class="mb-1 border-b border-gray-700 pb-1">
+                                <span class="font-semibold">{{ event.date|date:"d-m-Y" }}:</span>
+                                {{ event.title }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-center text-gray-400 text-xs">Brak nadchodzących wydarzeń</p>
+                {% endif %}
+            </div>
 
-
+        </div>
 
         <!-- Logout -->
         <div class="mt-auto">
@@ -73,72 +87,59 @@
     </aside>
 
     <!-- Główna zawartość -->
-    <main class="flex-1 bg-gradient-to-b from-gray-800 via-gray-700 to-yellow-100 p-8 text-gray-900">
-        <h1 class="text-3xl font-bold mb-6 text-white">Witaj, {{ user.username }}!</h1>
+    <main class="flex-1 bg-gray-900 p-8 text-white">
 
+        <h1 class="text-3xl font-bold mb-6">Witaj, {{ user.username }}!</h1>
 
-<!-- Kafelki akcji generowania -->
-<div onclick="location.href='{% url 'generate_lesson' %}'" class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
-    <h2 class="text-xl font-bold mb-2">Wygeneruj swoją lekcję</h2>
-</div>
+        <!-- Kafelki akcji generowania -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div onclick="location.href='{% url 'generate_lesson' %}'" class="bg-gray-800 rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+                <h2 class="text-xl font-bold mb-2">Wygeneruj swoją lekcję</h2>
+            </div>
 
-<div onclick="location.href='{% url 'generate_quiz_previous' %}'" class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
-    <h2 class="text-xl font-bold mb-2">Stwórz jeden sprawdzian z wygenerowanej lekcji</h2>
-</div>
+            <div onclick="location.href='{% url 'generate_quiz_previous' %}'" class="bg-gray-800 rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+                <h2 class="text-xl font-bold mb-2">Stwórz jeden sprawdzian z wygenerowanej lekcji</h2>
+            </div>
 
-<div onclick="window.open('{% url 'generate_quiz_multiple' %}', '_blank')" 
-     class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
-    <h2 class="text-xl font-bold mb-2">Wygeneruj sprawdzian z wybranych lekcji</h2>
-    <p>Kliknij, aby wybrać lekcje i wygenerować test.</p>
-</div>
+            <div onclick="window.open('{% url 'generate_quiz_multiple' %}', '_blank')" class="bg-gray-800 rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+                <h2 class="text-xl font-bold mb-2">Wygeneruj sprawdzian z wybranych lekcji</h2>
+                <p class="text-gray-300 text-sm">Kliknij, aby wybrać lekcje i wygenerować test.</p>
+            </div>
 
+            <a href="{% url 'print_lesson' %}" class="bg-gray-800 rounded-lg shadow-lg p-6 hover:scale-105 transition block">
+                <h2 class="text-xl font-bold mb-2">Edytuj i drukuj wygenerowane lekcje i sprawdziany</h2>
+                <p class="text-gray-300 text-sm">Kliknij, aby zobaczyć wszystkie lekcje oraz generować PDF do druku</p>
+            </a>
 
-<a href="{% url 'print_lesson' %}" class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition block">
-    <h2 class="text-xl font-bold mb-2">Edytuj i drukuj wygenerowane lekcje i sprawdziany</h2>
-    <p class="text-gray-300">Kliknij, aby zobaczyć wszystkie lekcje oraz sprawdziany i generować PDF do druku</p>
-</a>
+            <div onclick="location.href='{% url 'class_dashboard' %}'" class="bg-gray-800 rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+                <h2 class="text-xl font-bold mb-2">🏫 Stwórz środowisko klasowe</h2>
+                <p class="text-gray-300 text-sm">Twórz klasy i przypisuj do nich wygenerowane lekcje.</p>
+            </div>
 
+            <div onclick="location.href='{% url 'calendar_view' %}'" class="bg-gray-800 rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+                <h2 class="text-xl font-bold mb-2">📅 Zaplanuj w kalendarzu</h2>
+                <p class="text-gray-300 text-sm">Dodaj swoje wydarzenia, przypomnienia lub lekcje.</p>
+            </div>
 
-<div onclick="location.href='{% url 'class_dashboard' %}'"
-     class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
-    <h2 class="text-xl font-bold mb-2">🏫 Stwórz środowisko klasowe</h2>
-    <p class="text-gray-300">Twórz klasy i przypisuj do nich wygenerowane lekcje.</p>
-</div>
+            <div onclick="location.href='{% url 'student_manager' %}'" class="bg-gray-800 rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+                <h2 class="text-xl font-bold mb-2">📚 Uczniowie i oceny</h2>
+                <p class="text-gray-300 text-sm">Zarządzaj uczniami, klasami, ocenami i notatkami.</p>
+            </div>
 
+            <div onclick="location.href='{% url 'reading_comprehension' %}'" class="bg-gray-800 rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
+                <h2 class="text-xl font-bold mb-2">📖 Reading Comprehension AI</h2>
+                <p class="text-gray-300 text-sm">Wklej lub wrzuć artykuł — AI stworzy pytania sprawdzające zrozumienie tekstu.</p>
+            </div>
+        </div>
 
-<div onclick="location.href='{% url 'calendar_view' %}'"
-     class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
-    <h2 class="text-xl font-bold mb-2">📅 Zaplanuj w kalendarzu</h2>
-    <p class="text-gray-300">Dodaj swoje wydarzenia, przypomnienia lub lekcje.</p>
-</div>
-
-<div onclick="location.href='{% url 'student_manager' %}'"
-     class="bg-gray-800 text-white rounded-lg shadow-lg p-6 hover:scale-105 transition cursor-pointer">
-    <h2 class="text-xl font-bold mb-2">📚 Uczniowie i oceny</h2>
-    <p class="text-gray-300">Zarządzaj uczniami, klasami, ocenami i notatkami.</p>
-</div>
-
-
-
-
-
-        <!-- Kafelki podglądu wygenerowanych zasobów -->
+        <!-- Kafelek ostatnich lekcji -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div onclick="location.href='{% url 'view_generated_lessons' %}'" class="bg-yellow-500 text-gray-900 rounded-lg p-6 shadow-lg text-center hover:scale-105 transition cursor-pointer">
                 <h2 class="text-lg font-bold mb-2">Zobacz ostatnie lekcje </h2>
                 <p>Ilość wygenerowanych lekcji: {{ user.generatedlesson_set.count }}</p>
             </div>
-            <div class="bg-yellow-500 text-gray-900 rounded-lg p-6 shadow-lg text-center hover:scale-105 transition cursor-pointer">
-                <h2 class="text-lg font-bold mb-2">Sprawdź wygenerowane sprawdziany</h2>
-                <p>Ilość wygenerowanych sprawdzianów: 5</p>
-            </div>
-            <div class="bg-yellow-500 text-gray-900 rounded-lg p-6 shadow-lg text-center hover:scale-105 transition cursor-pointer">
-                <h2 class="text-lg font-bold mb-2">Sprawdź wydrukowane lekcje</h2>
-                <p>Ilość wydrukowanych lekcji: 45</p>
-            </div>
         </div>
 
     </main>
-
 </body>
 </html>
