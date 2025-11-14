@@ -15,14 +15,14 @@ RUN apt-get update && apt-get install -y \
     libcairo2-dev \
     libpango-1.0-0 \
     libpango1.0-dev \
-    libgdk-pixbuf2.0-0 \
-    libgdk-pixbuf2.0-dev \
+    libgdk-pixbuf-xlib-2.0-0 \
+    libgdk-pixbuf-xlib-2.0-dev \
     libffi-dev \
     shared-mime-info \
     wget \
     fonts-dejavu-core \
     fonts-liberation \
-&& rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 # --- Skopiuj plik requirements i zainstaluj zależności ---
 COPY requirements.txt .
