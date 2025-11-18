@@ -41,3 +41,33 @@ variable "django_settings_module" {
   type        = string
 }
 
+
+variable "email_backend" {
+  type        = string
+  description = "Django email backend"
+}
+
+variable "email_host" {
+  type        = string
+}
+
+variable "email_port" {
+  type        = number
+}
+
+variable "email_use_tls" {
+  type        = bool
+}
+
+variable "email_host_user" {
+  type        = string
+}
+
+variable "email_host_password" {
+  type        = string
+}
+
+variable "openai_api_key" {
+  type        = string
+}
+

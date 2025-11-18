@@ -65,7 +65,15 @@ resource "aws_ecs_task_definition" "django_task" {
         { name = "DB_PASSWORD", value = var.db_password },
         { name = "DB_HOST", value = var.db_host },
         { name = "DB_PORT", value = "5432" },
-        { name = "ALLOWED_HOSTS", value = "edublinkier.com,app-alb-prod-465977408.eu-central-1.elb.amazonaws.com" }
+        { name = "ALLOWED_HOSTS", value = "edublinkier.com,app-alb-prod-465977408.eu-central-1.elb.amazonaws.com" },
+        { name = "OPENAI_API_KEY", value = var.openai_api_key },
+        { name = "EMAIL_BACKEND", value = var.email_backend },
+        { name = "EMAIL_HOST", value = var.email_host },
+        { name = "EMAIL_PORT", value = tostring(var.email_port) },
+        { name = "EMAIL_USE_TLS", value = tostring(var.email_use_tls) },
+        { name = "EMAIL_HOST_USER", value = var.email_host_user },
+        { name = "EMAIL_HOST_PASSWORD", value = var.email_host_password }
+      
 
       ]
       logConfiguration = {
