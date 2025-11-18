@@ -50,7 +50,7 @@ LOGGING = {
 # (reszta ruchu przechodzi normalnie przez ALLOWED_HOSTS)
 INSTALLED_APPS += ["storages"]
 
-AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = "eu-central-1"
 AWS_S3_ADDRESSING_STYLE = "virtual"
 AWS_DEFAULT_ACL = None
