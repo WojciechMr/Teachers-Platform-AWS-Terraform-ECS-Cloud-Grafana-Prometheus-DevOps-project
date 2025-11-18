@@ -76,21 +76,30 @@ def natural_sort_key(s):
 
 import boto3
 from django.conf import settings
+from django.shortcuts import render
 
 def home(request):
-    s3 = boto3.client('s3')
+    # Utwórz klienta S3
+    s3 = boto3.client('s3', region_name=settings.AWS_S3_REGION_NAME)
+
     bucket_name = settings.AWS_STORAGE_BUCKET_NAME
     prefix = 'static/images/screens/'
 
+    # Pobierz listę obiektów w bucket
     response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
     images = []
+
     for obj in response.get('Contents', []):
         key = obj['Key']
         if key.lower().endswith(('.png', '.jpg', '.jpeg')):
-            images.append(key.replace(prefix, ''))  # tylko nazwa pliku
-    images.sort()  # opcjonalnie sortowanie
+            # Generuj pełny URL do S3
+            images.append(f"https://{bucket_name}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{key}")
+
+    # Sortowanie alfabetyczne / numeryczne
+    images.sort()
 
     return render(request, 'home.html', {'images': images})
+
 
 
 # ---------------------

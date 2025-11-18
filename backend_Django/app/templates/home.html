@@ -92,7 +92,7 @@
         <!-- Slider -->
         <div class="slider-container relative flex-1">
             {% for img in images %}
-                <img src="{% static 'images/screens/' %}{{ img }}" 
+                <img src="{{ img }}" 
                      alt="Zrzut {{ forloop.counter }}" 
                      class="{% if forloop.first %}active{% endif %}">
             {% endfor %}
