@@ -42,9 +42,19 @@ LOGGING = {
 }
 
 # --- Statyczne pliki ---
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATIC_URL = "/static/"
+#STATIC_ROOT = os.path.join(BASE_DIR, "static")
+#STATIC_URL = "/static/"
 
 # --- Dla bezpieczeństwa health checków ---
 # ALB nie ustawia Host header poprawnie, więc /health/ jest dozwolone bez walidacji
 # (reszta ruchu przechodzi normalnie przez ALLOWED_HOSTS)
+INSTALLED_APPS += ["storages"]
+
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME")
+AWS_S3_REGION_NAME = "eu-central-1"
+AWS_S3_ADDRESSING_STYLE = "virtual"
+AWS_DEFAULT_ACL = None
+AWS_S3_FILE_OVERWRITE = False
+
+STATIC_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/static/"
+STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
