@@ -33,7 +33,7 @@ RUN pip install --upgrade pip \
 COPY . .
 
 # --- Collect static files ---
-RUN python manage.py collectstatic --noinput
+#RUN python manage.py collectstatic --noinput
 
 # --- Gunicorn nasłuchuje na 0.0.0.0:8000 ---
 CMD ["gunicorn", "web.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "30", "--access-logfile", "-", "--error-logfile", "-"]
