@@ -71,3 +71,13 @@ variable "openai_api_key" {
   type        = string
 }
 
+variable "aws_storage_bucket_name" {
+  description = "Name of the S3 bucket for static files"
+  type        = string
+}
+
+variable "aws_s3_region_name" {
+  description = "AWS region of the S3 bucket"
+  type        = string
+  default     = "eu-central-1"
+}
