@@ -42,6 +42,14 @@ import PyPDF2
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from io import BytesIO
 from weasyprint import HTML
+
+from .metrics import (
+    login_counter,
+    registration_counter,
+    lesson_gen_counter,
+    quiz_gen_counter,
+    track_latency
+)
 # ---------------------
 # REJESTRACJA FONTU PDF UTF-8
 # ---------------------
@@ -127,6 +135,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 
+@track_latency
 def register_view(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -143,6 +152,7 @@ def register_view(request):
 
         user = User.objects.create_user(username=username, email=email, password=password)
         user.save()
+        registration_counter.inc()
 
         # Wysyłka maila powitalnego
         subject = "Witamy w Edublinkier – Twoja przygoda z nauką zaczyna się teraz!"
@@ -165,6 +175,7 @@ def register_view(request):
 
     return render(request, "register.html")
 
+@track_latency
 def login_view(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -172,6 +183,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
+            login_counter.inc()
             login(request, user)
             return redirect("dashboard")
         else:
@@ -216,6 +228,7 @@ Formatuj w formie punktów.
         lesson_text = "Błąd OpenAI: " + str(e).encode('utf-8', 'replace').decode('utf-8')
     return lesson_text
 
+@track_latency
 @login_required(login_url='/login/')
 def generate_lesson_view(request):
     # Pobranie lub utworzenie obiektu użycia lekcji
@@ -251,6 +264,7 @@ def generate_lesson_view(request):
             duration=int(duration),
             content=lesson_text
         )
+        lesson_gen_counter.inc()
 
         # Zachowaj max 25 ostatnich lekcji
         lessons_to_keep = GeneratedLesson.objects.filter(user=request.user).order_by('-created_at')
@@ -277,6 +291,7 @@ def generate_lesson_view(request):
 # ---------------------
 # GENEROWANIE QUIZU
 # ---------------------
+@track_latency
 @login_required(login_url='/login/')
 def generate_quiz_from_lesson(request, lesson_id):
     lesson = get_object_or_404(GeneratedLesson, id=lesson_id, user=request.user)
@@ -308,6 +323,7 @@ def generate_quiz_from_lesson(request, lesson_id):
             lesson=lesson,
             content=quiz_text
         )
+        quiz_gen_counter.inc()
 
         # 🔹 NOWOŚĆ: przekierowanie od razu do edycji/drukowania PDF
         return redirect('edit_and_download_quiz', quiz_id=quiz.id)
@@ -1221,5 +1237,6 @@ pre {{ white-space: pre-wrap; word-wrap: break-word; font-size: 10pt; }}
         "open_questions": open_questions,
         "mc_questions": mc_questions,
     })
+
 
 

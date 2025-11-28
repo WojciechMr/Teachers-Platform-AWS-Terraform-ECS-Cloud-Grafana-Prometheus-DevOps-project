@@ -1,5 +1,12 @@
 from django.urls import path
 from . import views
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from django.http import HttpResponse
+
+
+
+def metrics_view(request):
+    return HttpResponse(generate_latest(), content_type=CONTENT_TYPE_LATEST)
 
 urlpatterns = [
     path("health/", views.health),  # opcjonalne, middleware i tak zwraca 200
@@ -54,6 +61,8 @@ urlpatterns = [
     path('grade/<int:grade_id>/delete/', views.delete_grade, name='delete_grade'),
     path("reading-comprehension/", views.reading_comprehension_view, name="reading_comprehension"),
     path('classes/<int:class_id>/delete/', views.delete_class, name='delete_class'),
+    #prometheus scrap metryk
+    path("metrics/", metrics_view),
     
 
 
