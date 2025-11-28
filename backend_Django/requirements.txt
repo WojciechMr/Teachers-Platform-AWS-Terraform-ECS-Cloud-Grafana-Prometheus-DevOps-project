@@ -16,3 +16,4 @@ docx2txt==0.9
 weasyprint==66.0
 boto3>=1.28.0
 django-storages==1.14.6
+prometheus_client>=0.17.0
