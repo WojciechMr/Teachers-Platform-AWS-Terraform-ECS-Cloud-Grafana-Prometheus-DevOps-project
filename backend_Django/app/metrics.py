@@ -1,6 +1,6 @@
+# metrics.py
 from prometheus_client import Counter, Histogram
 from functools import wraps
-from .metrics import request_latency
 
 # Liczniki akcji
 login_counter = Counter("django_login_total", "Total number of logins")
@@ -11,6 +11,7 @@ quiz_gen_counter = Counter("django_quiz_generated_total", "Total quizzes generat
 # Histogram dla czasu requestów
 request_latency = Histogram("django_request_latency_seconds", "Request latency in seconds")
 
+# Dekorator dla widoków
 def track_latency(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):

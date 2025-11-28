@@ -1,8 +1,7 @@
 # app/middleware.py
 from django.http import HttpResponse
-from prometheus_client import Histogram
 import time
-request_latency = Histogram("django_request_latency_seconds", "Request latency in seconds (middleware)")
+from .metrics import request_latency
 
 class HealthCheckBypassHostMiddleware:
     """
@@ -23,6 +22,10 @@ class PrometheusBeforeAfterMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # Pomijamy health check w Prometheus
+        if request.path == "/health/":
+            return self.get_response(request)
+
         start_time = time.time()
         response = self.get_response(request)
         elapsed = time.time() - start_time

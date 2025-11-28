@@ -27,7 +27,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "app.middleware.HealthCheckBypassHostMiddleware",  # <-- PIERWSZY
-    "app.middleware.HealthCheckBypassHostMiddleware",
     "app.middleware.PrometheusBeforeAfterMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
