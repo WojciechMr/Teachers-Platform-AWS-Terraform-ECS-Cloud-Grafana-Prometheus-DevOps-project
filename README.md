@@ -69,3 +69,71 @@ This project demonstrates a combination of **full DevOps automation** and **prac
 
 ---
 
+---
+
+## 📊 Monitoring & Observability in Action
+
+This project includes a complete observability stack running on EC2 with SSM:
+- **Prometheus** for metric scraping  
+- **Grafana** for dashboards  
+- **Custom Django metrics** for user activity & AI usage  
+- **System metrics** (CPU, RAM, GC, latency, etc.)
+
+---
+
+### 🔧 EC2 + SSM: Monitoring Stack Running
+
+Below is a screenshot taken directly from the EC2 instance (connected via SSM), showing the running Docker containers for Prometheus and Grafana:
+
+📸 **EC2 Docker Status**
+
+![EC2 Docker Running](./screenshots/poprawny-start-docker-grafana.png)
+
+*(source: `poprawny start docker grafana.png`)*
+
+---
+
+### 📈 Grafana Dashboard Preview
+
+Grafana visualizes all collected metrics, including:
+- User login/registration events  
+- AI lesson & quiz generation counts  
+- Request latency distribution  
+- Python GC activity  
+- CPU & memory metrics  
+
+📸 **Main Grafana Dashboard**
+
+![Grafana Dashboard](./screenshots/prawidlowy.png)
+
+*(source: `prawidlowy.png`)*
+
+---
+
+### 📊 Prometheus Metrics Overview
+
+| Metric | Description |
+|--------|-------------|
+| `django_login_total` | Total number of user logins |
+| `django_registration_total` | Number of teacher signups |
+| `django_lesson_generated_total` | AI-generated lessons |
+| `django_quiz_generated_total` | AI-generated quizzes |
+| `django_request_latency_seconds_sum` | Total cumulative request time |
+| `process_cpu_seconds_total` | CPU usage over time |
+| `process_resident_memory_bytes` | RAM usage of backend |
+| `python_gc_collections_total` | GC runs (gen0 / gen1 / gen2) |
+
+GC metrics have 0 values in gen1/gen2 unless heavy memory churn occurs — this is normal behavior.
+
+---
+
+### 🧠 Observability Notes
+
+- Prometheus scrapes every **15 seconds**  
+- Grafana dashboards auto-refresh  
+- EC2 runs fully inside a private subnet, accessed through **SSM only**  
+- Dashboard history is persisted  
+
+---
+
+
