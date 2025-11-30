@@ -97,7 +97,7 @@ resource "aws_ecs_service" "django_service" {
   name            = "django-service-${var.environment}"
   cluster         = aws_ecs_cluster.app_cluster.id
   task_definition = aws_ecs_task_definition.django_task.arn
-  desired_count   = 2
+  desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
