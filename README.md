@@ -87,7 +87,7 @@ Below is a screenshot taken directly from the EC2 instance (connected via SSM), 
 
 📸 **EC2 Docker Status**
 
-![EC2 Docker Running](./screenshots/poprawny-start-docker-grafana.png)
+![EC2 Docker Running](./screenshots/dockerpsec2.png)
 
 *(source: `poprawny start docker grafana.png`)*
 
